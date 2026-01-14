@@ -172,17 +172,13 @@ public class AppStateService : IAppStateService
             // 确保主窗口显示和激活
             if (MainWindow != null)
             {
-                // 重新设置窗口启动位置和状态
-                MainWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                MainWindow.WindowState = WindowState.FullScreen;
-
-                // 强制重新计算位置
-                CenterMainWindow();
-
+                // 重要：不要在这里反复重设 WindowState/Position/Width/Height
+                // X11/WM 下重复重配窗口会造成“叠影/抖动/像多了一层”的观感。
                 MainWindow.Show();
                 MainWindow.Activate();
+                MainWindow.Focus();
 
-                _logger.LogInformation("主窗口已显示并激活，位置已重新居中");
+                _logger.LogInformation("主窗口已显示并激活");
             }
             else
             {
@@ -590,14 +586,11 @@ public class AppStateService : IAppStateService
         {
             if (DesktopLifetime?.MainWindow != null)
             {
-                // 确保主窗口位置正确
-                DesktopLifetime.MainWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                DesktopLifetime.MainWindow.WindowState = WindowState.FullScreen;
-
                 DesktopLifetime.MainWindow.Show();
                 DesktopLifetime.MainWindow.Activate();
+                DesktopLifetime.MainWindow.Focus();
 
-                _logger.LogInformation("主窗口已显示并激活，位置已重置");
+                _logger.LogInformation("主窗口已显示并激活");
             }
             else
             {
