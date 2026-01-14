@@ -444,7 +444,7 @@ namespace FaceLocker.Services
         /// </summary>
         public static void LogInfo(string message)
         {
-            Console.WriteLine($"[INFO] {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
+            // 避免 Console 噪音：SDK 侧日志由上层服务统一接管
         }
 
         /// <summary>
@@ -452,7 +452,7 @@ namespace FaceLocker.Services
         /// </summary>
         public static void LogError(string message)
         {
-            Console.WriteLine($"[ERROR] {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
+            // 避免 Console 噪音：SDK 侧日志由上层服务统一接管
         }
 
         /// <summary>
@@ -460,7 +460,7 @@ namespace FaceLocker.Services
         /// </summary>
         public static void LogDebug(string message)
         {
-            Console.WriteLine($"[DEBUG] {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
+            // 避免 Console 噪音：SDK 侧日志由上层服务统一接管
         }
 
         /// <summary>

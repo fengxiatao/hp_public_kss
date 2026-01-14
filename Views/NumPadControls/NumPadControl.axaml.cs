@@ -167,7 +167,7 @@ public partial class NumPadControl : UserControl
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"初始化按钮事件失败: {ex.Message}");
+            // 避免 Console 噪音：统一由上层日志系统处理（此处静默即可）
         }
     }
 
@@ -207,7 +207,7 @@ public partial class NumPadControl : UserControl
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"绑定按钮命令失败: {ex.Message}");
+            // 避免 Console 噪音：统一由上层日志系统处理（此处静默即可）
         }
     }
 

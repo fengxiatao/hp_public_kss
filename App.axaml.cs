@@ -113,8 +113,7 @@ namespace FaceLocker
             // 摄像头服务配置：
             // 方案1：零拷贝视频渲染 + GStreamer cairooverlay 绘制人脸框（推荐）
             services.AddSingleton<ICameraService, NativeVideoCameraService>();
-            // 方案2：软件渲染（备用，CPU占用较高）
-            // services.AddSingleton<ICameraService, V4L2MppCameraService>();
+            // 备选软件渲染实现已移除，避免项目长期残留僵尸代码
             services.AddSingleton<IDataSyncService, DataSyncService>();
 
             // 8. 网络通讯服务

@@ -15,7 +15,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static FaceLocker.Services.BaiduFaceSDKInterop; // 添加这个以使用JsonResultParser
-using FaceLocker.Services.FaceRecognitions;
+// using FaceLocker.Services.FaceRecognitions;
 
 namespace FaceLocker.ViewModels
 {
@@ -65,10 +65,9 @@ namespace FaceLocker.ViewModels
         private readonly SemaphoreSlim _faceDetectionLock = new(1, 1);
         private WrapperFaceBox[] _currentFaces = [];
         private readonly object _faceLock = new();
-        private readonly FaceTracker _faceTracker = new(); // 卡尔曼滤波人脸追踪器
+        // FaceTracker（预测/平滑）已移除：主路径由 GStreamer cairooverlay 同步绘制
 
-        // 1×1 透明占位图
-        private readonly WriteableBitmap _emptyFrame = new(new PixelSize(1, 1), new Vector(96, 96), PixelFormat.Bgra8888, AlphaFormat.Premul);
+        // 软件渲染占位图已移除（主路径不再把帧渲染到 UI）
 
         // 人脸检测预分配缓冲区 - 避免每帧分配内存
         private byte[]? _faceDetectionBuffer;
@@ -122,8 +121,7 @@ namespace FaceLocker.ViewModels
             // 初始化命令
             InitializeCommands();
 
-            // 初始化CameraImage为占位图，避免null异常
-            _cameraVideoElement = _emptyFrame;
+            // 不再维护 CameraVideoElement（软件渲染预览已移除）
 
             _logger.LogInformation("RetrieveWindowViewModel 初始化完成");
         }
@@ -229,15 +227,7 @@ namespace FaceLocker.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isConfirmOpenLockerEnabled, value);
         }
 
-        /// <summary>
-        /// 摄像头视频元素
-        /// </summary>
-        private WriteableBitmap _cameraVideoElement;
-        public WriteableBitmap CameraVideoElement
-        {
-            get => _cameraVideoElement;
-            private set => this.RaiseAndSetIfChanged(ref _cameraVideoElement, value);
-        }
+        // CameraVideoElement（软件渲染预览）已移除：主路径使用 NativeVideoHost 显示视频
 
         /// <summary>
         /// 是否显示摄像头未连接提示
@@ -249,28 +239,8 @@ namespace FaceLocker.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _showCameraNotConnected, value);
         }
         
-        /// <summary>
-        /// 是否使用原生视频模式（零拷贝渲染）
-        /// 当使用 NativeVideoCameraService 时为 true
-        /// </summary>
-        private bool _useNativeVideoMode = false;
-        public bool UseNativeVideoMode
-        {
-            get => _useNativeVideoMode;
-            set => this.RaiseAndSetIfChanged(ref _useNativeVideoMode, value);
-        }
-
-        #region 人脸框覆盖层属性（用于原生视频模式）
-        
-        /// <summary>
-        /// 人脸框列表（用于覆盖层绘制）
-        /// </summary>
-        private System.Collections.Generic.List<FaceLocker.Views.Controls.FaceBoxInfo>? _faceBoxes;
-        public System.Collections.Generic.List<FaceLocker.Views.Controls.FaceBoxInfo>? FaceBoxes
-        {
-            get => _faceBoxes;
-            set => this.RaiseAndSetIfChanged(ref _faceBoxes, value);
-        }
+        // 主路径：NativeVideoHost + GStreamer cairooverlay 绘制人脸框（同步）
+        // 不再保留 UseNativeVideoMode/FaceBoxes/软件渲染备用分支，避免代码混淆
 
         /// <summary>
         /// 摄像头宽度（用于坐标转换，与人脸检测帧尺寸一致）
@@ -292,7 +262,7 @@ namespace FaceLocker.ViewModels
             set => this.RaiseAndSetIfChanged(ref _cameraHeight, value);
         }
         
-        #endregion
+        // #endregion  // 备用 UI 覆盖层相关属性已移除
 
         /// <summary>
         /// 是否显示人脸检测超时提示
@@ -490,8 +460,7 @@ namespace FaceLocker.ViewModels
                     bool windowSet = await nativeService.SetWindowAsync(x11WindowId);
                     if (windowSet)
                     {
-                        UseNativeVideoMode = true;
-                        _logger.LogInformation("原生视频模式已启用（注意：人脸框将不显示）");
+                        _logger.LogInformation("原生视频模式已启用（人脸框由 GStreamer cairooverlay 同步绘制）");
                         
                         // 如果摄像头已启动但未播放，启动播放
                         if (_isCameraReady)
@@ -501,20 +470,23 @@ namespace FaceLocker.ViewModels
                     }
                     else
                     {
-                        _logger.LogWarning("设置原生视频窗口失败，将使用软件渲染模式");
-                        UseNativeVideoMode = false;
+                        _logger.LogError("设置原生视频窗口失败（当前版本不再提供软件渲染备用路径）");
+                        ShowCameraNotConnected = true;
+                        SystemPrompt = "原生视频窗口初始化失败";
                     }
                 }
                 else
                 {
-                    _logger.LogDebug("摄像头服务不支持原生视频模式，使用软件渲染");
-                    UseNativeVideoMode = false;
+                    _logger.LogError("摄像头服务不支持原生视频模式（当前版本不再提供软件渲染备用路径）");
+                    ShowCameraNotConnected = true;
+                    SystemPrompt = "摄像头服务不支持原生视频模式";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "设置原生视频窗口时发生异常");
-                UseNativeVideoMode = false;
+                ShowCameraNotConnected = true;
+                SystemPrompt = "原生视频窗口初始化异常";
             }
         }
         #endregion
@@ -599,28 +571,10 @@ namespace FaceLocker.ViewModels
 
             try
             {
-                // 使用卡尔曼滤波预测的人脸位置（每帧更新，平滑跟踪）
-                WrapperFaceBox[] facesToDraw = _faceTracker.GetPredictedFaces();
-
                 // 获取帧尺寸
                 int frameWidth = frame.PixelSize.Width;
                 int frameHeight = frame.PixelSize.Height;
-
-                // 绘制预测的人脸框（平滑跟踪效果）
-                if (facesToDraw != null && facesToDraw.Length > 0 && _isCameraReady)
-                {
-                    try
-                    {
-                        frame = FaceBoxRenderer.RenderFaceBoxes(frame, facesToDraw, frameWidth, frameHeight);
-                    }
-                    catch
-                    {
-                        // 忽略绘制异常，继续显示原始帧
-                    }
-                }
-
-                // 更新摄像头图像
-                CameraVideoElement = frame;
+                // 主路径：视频由 NativeVideoHost 显示，人脸框由 GStreamer cairooverlay 绘制
 
                 // 如果是第一次收到帧，更新连接状态
                 if (ShowCameraNotConnected)
@@ -804,7 +758,7 @@ namespace FaceLocker.ViewModels
                 var detectionResult = await _baiduFaceService.DetectFacesOnlyAsync(mat);
                 
                 // 更新卡尔曼滤波追踪器（平滑人脸框跟踪）
-                _faceTracker.Update(detectionResult.FaceBoxes);
+                // 由 native cairooverlay 绘制人脸框，此处不再做 UI 侧追踪绘制
                 
                 lock (_faceLock)
                 {
@@ -860,30 +814,26 @@ namespace FaceLocker.ViewModels
         /// </summary>
         private void UpdateFaceBoxOverlay(WrapperFaceBox[]? faces)
         {
-            // 无论是否原生模式都更新，因为覆盖层可以独立显示
-            Dispatcher.UIThread.Post(() =>
+            // UI 叠加绘制方案已移除：人脸框由 GStreamer cairooverlay 同步绘制到视频帧
+            if (_cameraService is INativeVideoCameraService nativeService)
             {
                 if (faces == null || faces.Length == 0)
                 {
-                    if (FaceBoxes != null && FaceBoxes.Count > 0)
-                    {
-                        _logger.LogDebug("清空人脸框覆盖层");
-                    }
-                    FaceBoxes = null;
-                    return;
+                    nativeService.ClearFaceBoxes();
                 }
-
-                var boxList = new System.Collections.Generic.List<FaceLocker.Views.Controls.FaceBoxInfo>();
-                foreach (var face in faces)
+                else
                 {
-                    boxList.Add(FaceLocker.Views.Controls.FaceBoxInfo.FromWrapperFaceBox(
-                        face.center_x, face.center_y, face.width, face.height, face.score));
-                    _logger.LogDebug("人脸框: center=({CX:F3},{CY:F3}), size=({W:F3},{H:F3}), score={Score:F3}",
-                        face.center_x, face.center_y, face.width, face.height, face.score);
+                    var gstBoxes = faces.Select(f => new NativeVideoCameraService.GstFaceBox
+                    {
+                        center_x = f.center_x,
+                        center_y = f.center_y,
+                        width = f.width,
+                        height = f.height,
+                        score = f.score
+                    }).ToArray();
+                    nativeService.SetFaceBoxes(gstBoxes, CameraWidth, CameraHeight);
                 }
-                FaceBoxes = boxList;
-                _logger.LogDebug("更新人脸框覆盖层，共 {Count} 个框, UseNativeVideoMode={Mode}", boxList.Count, UseNativeVideoMode);
-            });
+            }
         }
 
         /// <summary>
@@ -1420,15 +1370,7 @@ namespace FaceLocker.ViewModels
                     _logger.LogWarning(lockEx, "释放人脸检测信号量时发生警告");
                 }
 
-                // 释放占位图
-                try
-                {
-                    _emptyFrame?.Dispose();
-                }
-                catch (Exception bitmapEx)
-                {
-                    _logger.LogWarning(bitmapEx, "释放占位图时发生警告");
-                }
+                // 占位图已移除
 
                 _logger.LogInformation("RetrieveWindowViewModel资源清理完成");
             }

@@ -812,7 +812,7 @@ namespace FaceLocker.Services
         {
             if (floats == null || floats.Length == 0)
             {
-                Console.WriteLine("ConvertFloatsToBytes: 浮点数组为空");
+                // 避免 Console 噪音：返回空数组即可
                 return new byte[0];
             }
 
@@ -820,12 +820,12 @@ namespace FaceLocker.Services
             {
                 var bytes = new byte[floats.Length * sizeof(float)];
                 Buffer.BlockCopy(floats, 0, bytes, 0, bytes.Length);
-                Console.WriteLine($"ConvertFloatsToBytes: 成功转换，输入长度: {floats.Length}, 输出长度: {bytes.Length}");
+                // 避免 Console 噪音：不输出转换细节
                 return bytes;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ConvertFloatsToBytes异常: {ex.Message}");
+                // 避免 Console 噪音：由调用方记录异常上下文
                 return new byte[0];
             }
         }

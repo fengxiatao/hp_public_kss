@@ -50,38 +50,11 @@
 						BorderThickness="1"
 						Margin="50,48,0,0">
 					<Grid>
-						<!-- 原生视频显示（零拷贝渲染，推荐）
-						     GStreamer 直接渲染到此控件，不经过 UI 线程
-						     CPU 占用极低，适合 RK3568 (2G RAM) -->
+						<!-- 主路径：原生视频显示（零拷贝）+ 人脸框由 GStreamer cairooverlay 同步绘制 -->
 						<videocontrols:NativeVideoHost 
 							Name="NativeVideoHost"
 							HorizontalAlignment="Stretch"
-							VerticalAlignment="Stretch"
-							IsVisible="{Binding UseNativeVideoMode}"/>
-						
-						<!-- 人脸框覆盖层
-						     在视频上方绘制人脸框（支持原生和软件渲染模式）
-						     使用高 ZIndex 确保在原生窗口上方 -->
-						<videocontrols:FaceBoxOverlay 
-							Name="FaceBoxOverlay"
-							HorizontalAlignment="Stretch"
-							VerticalAlignment="Stretch"
-							FaceBoxes="{Binding FaceBoxes}"
-							SourceWidth="{Binding CameraWidth}"
-							SourceHeight="{Binding CameraHeight}"
-							BoxBrush="#00FF00"
-							BoxThickness="3"
-							IsHitTestVisible="False"
-							ZIndex="100"/>
-						
-						<!-- 软件渲染模式后备（WriteableBitmap）
-						     当原生模式不可用时使用 -->
-						<Image Name="CameraVideoDisplay"
-							   Source="{Binding CameraVideoElement}"
-							   Stretch="Uniform"
-							   HorizontalAlignment="Center"
-							   VerticalAlignment="Center"
-							   IsVisible="{Binding !UseNativeVideoMode}"/>
+							VerticalAlignment="Stretch"/>
 
 						<!-- 摄像头未连接提示 -->
 						<Border IsVisible="{Binding ShowCameraNotConnected}"
