@@ -68,10 +68,25 @@ public partial class MainWindow : Window
         base.OnOpened(e);
         _logger.LogInformation("MainWindow 已打开");
 
-        // 重要：不要在 OnOpened 再次强制设置 WindowState/Position/Width/Height
-        // X11/WM 下反复重设会造成“窗口抖动/闪动”观感。
-        this.Activate();
-        this.Focus();
+        // 强制全屏：某些 X11/WM 下 XAML 设置不生效，必须在 OnOpened 后再次设置
+        Dispatcher.UIThread.Post(() =>
+        {
+            _logger.LogInformation("强制进入全屏模式");
+            
+            // 先确保无边框
+            SystemDecorations = SystemDecorations.None;
+            ExtendClientAreaToDecorationsHint = true;
+            
+            // 强制全屏
+            EnterFullScreenCoveringPrimary();
+            
+            this.Activate();
+            this.Focus();
+            this.Topmost = true;
+            
+            // 短暂置顶后取消，确保窗口在最前
+            Dispatcher.UIThread.Post(() => { this.Topmost = false; }, DispatcherPriority.Background);
+        }, DispatcherPriority.Loaded);
     }
 
     /// <summary>

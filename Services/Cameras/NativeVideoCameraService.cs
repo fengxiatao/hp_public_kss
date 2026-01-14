@@ -576,6 +576,7 @@ namespace FaceLocker.Services
         {
             if (_playerHandle == IntPtr.Zero)
             {
+                _logger.LogWarning("[SetFaceBoxes] _playerHandle 为空，跳过");
                 return;
             }
 
@@ -585,6 +586,7 @@ namespace FaceLocker.Services
             }
             else
             {
+                _logger.LogDebug("[SetFaceBoxes] 调用 native: count={Count}, srcW={W}, srcH={H}", boxes.Length, sourceWidth, sourceHeight);
                 gst_player_set_face_boxes(_playerHandle, boxes, boxes.Length, sourceWidth, sourceHeight);
             }
         }

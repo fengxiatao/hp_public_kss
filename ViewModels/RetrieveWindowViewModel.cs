@@ -602,13 +602,8 @@ namespace FaceLocker.ViewModels
                     _lastFpsTime = DateTime.Now;
                 }
 
-                // 如果识别已完成，不再进行人脸检测
-                if (_isRecognitionCompleted)
-                {
-                    return;
-                }
-
                 // 异步进行人脸检测（不阻塞显示）
+                // 即使识别已完成，也继续检测以保持人脸框显示
                 ScheduleFaceDetectionAsync(frame, frameWidth, frameHeight);
             }
             catch (Exception ex)
@@ -738,15 +733,10 @@ namespace FaceLocker.ViewModels
             _lastDetectFrameHeight = height;
 
             if (_isDisposed || !_isCameraReady) return;
-            if (!_isRecognitionRunning || _faceDetectionCts?.IsCancellationRequested == true)
-            {
-                return;
-            }
 
             // 使用信号量防止并发处理
-            if (!await _faceDetectionLock.WaitAsync(0, _faceDetectionCts?.Token ?? CancellationToken.None))
+            if (!await _faceDetectionLock.WaitAsync(0))
             {
-                _logger.LogDebug("人脸检测正在处理中，跳过当前帧");
                 return;
             }
 
@@ -754,14 +744,10 @@ namespace FaceLocker.ViewModels
             Mat? bgrMat = null;
             try
             {
-                // 重置人脸检测标志
-                _hasDetectedFaceInCycle = false;
-
                 // 从字节数组创建Mat（BGRA格式）
                 mat = Mat.FromPixelData(height, width, MatType.CV_8UC4, frameData);
                 if (mat == null || mat.Empty())
                 {
-                    _logger.LogDebug("转换Mat失败或Mat为空");
                     return;
                 }
 
@@ -769,28 +755,35 @@ namespace FaceLocker.ViewModels
                 bgrMat = new Mat();
                 Cv2.CvtColor(mat, bgrMat, ColorConversionCodes.BGRA2BGR);
 
-                // 检测人脸
+                // 检测人脸（始终执行，保持人脸框显示）
                 var detectionResult = await _baiduFaceService.DetectFacesOnlyAsync(bgrMat);
-                
-                // 更新卡尔曼滤波追踪器（平滑人脸框跟踪）
-                // 由 native cairooverlay 绘制人脸框，此处不再做 UI 侧追踪绘制
                 
                 lock (_faceLock)
                 {
                     _currentFaces = detectionResult.FaceBoxes ?? [];
                 }
 
-                // 更新人脸框覆盖层（用于原生视频模式）
+                // 更新人脸框覆盖层（用于原生视频模式）- 始终更新以保持人脸框显示
                 UpdateFaceBoxOverlay(detectionResult.FaceBoxes);
 
                 if (detectionResult.FaceBoxes == null || detectionResult.FaceBoxes.Length == 0)
                 {
-                    _logger.LogDebug("未检测到人脸");
                     return;
                 }
 
-                _logger.LogDebug("检测到 {FaceCount} 个人脸", detectionResult.FaceBoxes.Length);
                 _hasDetectedFaceInCycle = true;
+
+                // 如果识别已完成，只做检测不做识别（保持人脸框显示）
+                if (_isRecognitionCompleted)
+                {
+                    return;
+                }
+
+                // 以下是识别流程（仅在未完成识别时执行）
+                if (!_isRecognitionRunning || _faceDetectionCts?.IsCancellationRequested == true)
+                {
+                    return;
+                }
 
                 // 重置无人脸检测超时定时器
                 await Dispatcher.UIThread.InvokeAsync(() => ResetNoFaceDetectionTimer());
@@ -803,7 +796,6 @@ namespace FaceLocker.ViewModels
                 try
                 {
                     _recognizedCapturedFaceImage = mat.ToBytes(".png");
-                    _logger.LogDebug("已保存当前帧作为用户头像，大小: {Size} bytes", _recognizedCapturedFaceImage.Length);
                 }
                 catch (Exception ex)
                 {
@@ -850,8 +842,17 @@ namespace FaceLocker.ViewModels
                         height = f.height,
                         score = f.score
                     }).ToArray();
+                    
+                    _logger.LogDebug("[取物] SetFaceBoxes: count={Count}, srcW={W}, srcH={H}, box0=({X},{Y},{BW},{BH})",
+                        gstBoxes.Length, srcW, srcH,
+                        gstBoxes[0].center_x, gstBoxes[0].center_y, gstBoxes[0].width, gstBoxes[0].height);
+                    
                     nativeService.SetFaceBoxes(gstBoxes, srcW, srcH);
                 }
+            }
+            else
+            {
+                _logger.LogWarning("[取物] _cameraService 不是 INativeVideoCameraService，无法设置人脸框");
             }
         }
 

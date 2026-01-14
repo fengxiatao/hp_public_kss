@@ -77,6 +77,10 @@ namespace FaceLocker.ViewModels
 
         // 软件渲染占位图已移除（主路径不再把帧渲染到 UI）
 
+        // 最近一次参与人脸检测的帧尺寸（用于把坐标正确传给 native cairooverlay）
+        private volatile int _lastDetectFrameWidth = 0;
+        private volatile int _lastDetectFrameHeight = 0;
+
         // 人脸检测预分配缓冲区 - 避免每帧分配内存
         private byte[]? _faceDetectionBuffer;
         private int _faceDetectionBufferSize = 0;
@@ -772,6 +776,9 @@ namespace FaceLocker.ViewModels
         /// </summary>
         private void ScheduleFaceDetectionAsync(WriteableBitmap frame, int frameWidth, int frameHeight)
         {
+            _lastDetectFrameWidth = frameWidth;
+            _lastDetectFrameHeight = frameHeight;
+
             // 限制人脸检测频率
             var now = DateTime.Now;
             var elapsedMs = (now - _lastFaceDetectionTime).TotalMilliseconds;
@@ -838,6 +845,9 @@ namespace FaceLocker.ViewModels
         private async Task ProcessFaceDetectionFromBytesAsync(byte[] frameData, int width, int height, int rowBytes)
         {
             if (_isDisposed || !_isCameraReady) return;
+
+            _lastDetectFrameWidth = width;
+            _lastDetectFrameHeight = height;
 
             Mat? mat = null;
             try
@@ -962,6 +972,9 @@ namespace FaceLocker.ViewModels
                 }
                 else
                 {
+                    var srcW = _lastDetectFrameWidth > 0 ? _lastDetectFrameWidth : CameraWidth;
+                    var srcH = _lastDetectFrameHeight > 0 ? _lastDetectFrameHeight : CameraHeight;
+
                     var gstBoxes = faces.Select(f => new NativeVideoCameraService.GstFaceBox
                     {
                         center_x = f.center_x,
@@ -970,7 +983,7 @@ namespace FaceLocker.ViewModels
                         height = f.height,
                         score = f.score
                     }).ToArray();
-                    nativeService.SetFaceBoxes(gstBoxes, CameraWidth, CameraHeight);
+                    nativeService.SetFaceBoxes(gstBoxes, srcW, srcH);
                 }
             }
 
