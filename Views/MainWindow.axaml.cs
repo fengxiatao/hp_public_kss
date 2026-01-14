@@ -17,10 +17,7 @@ namespace FaceLocker.Views;
 public partial class MainWindow : Window
 {
     #region 私有字段
-    // 退出全屏后用来恢复的小屏边界（像素坐标）
-    private PixelRect? _savedBoundsBeforeFullscreen;
     private readonly ILogger<MainWindow> _logger;
-    private bool _isInitialFullScreenSet = false;
     #endregion
 
     #region 构造函数
@@ -46,9 +43,6 @@ public partial class MainWindow : Window
             viewModel.WindowReference = this;
         }
 
-        // 订阅位置变化事件
-        this.PositionChanged += OnWindowPositionChanged;
-
         _logger.LogInformation("MainWindow 初始化完成");
     }
     #endregion
@@ -72,29 +66,12 @@ public partial class MainWindow : Window
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-        _logger.LogInformation("MainWindow 已打开，当前位置: {Position}", Position);
+        _logger.LogInformation("MainWindow 已打开");
 
-        // 延迟全屏切换，确保窗口完全初始化
-        Dispatcher.UIThread.Post(() =>
-        {
-            try
-            {
-                if (!_isInitialFullScreenSet)
-                {
-                    EnterFullScreenCoveringPrimary();
-                    _isInitialFullScreenSet = true;
-                    _logger.LogInformation("MainWindow 初始全屏设置完成，位置: {Position}", Position);
-                }
-
-                // 确保窗口激活
-                this.Activate();
-                this.Focus();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "全屏切换过程中发生异常");
-            }
-        }, DispatcherPriority.Background);
+        // 重要：不要在 OnOpened 再次强制设置 WindowState/Position/Width/Height
+        // X11/WM 下反复重设会造成“窗口抖动/闪动”观感。
+        this.Activate();
+        this.Focus();
     }
 
     /// <summary>
@@ -104,19 +81,7 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
-        // 取消事件订阅
-        this.PositionChanged -= OnWindowPositionChanged;
         _logger.LogInformation("MainWindow 已关闭");
-    }
-
-    /// <summary>
-    /// 窗口位置变化事件处理
-    /// </summary>
-    /// <param name="sender">事件源</param>
-    /// <param name="e">事件参数</param>
-    private void OnWindowPositionChanged(object? sender, PixelPointEventArgs e)
-    {
-        _logger.LogDebug("MainWindow 位置变化: {Position}", e.Point);
     }
     #endregion
 
@@ -135,20 +100,8 @@ public partial class MainWindow : Window
         }
         else
         {
-            // 进入全屏：先保存当前普通窗口边界
-            SaveCurrentBoundsAsRestorePoint();
             EnterFullScreenCoveringPrimary();
         }
-    }
-
-    /// <summary>
-    /// 保存当前窗口边界作为恢复点
-    /// </summary>
-    private void SaveCurrentBoundsAsRestorePoint()
-    {
-        // 保存当前窗口的像素边界，以便恢复
-        _savedBoundsBeforeFullscreen = new PixelRect(Position, new PixelSize((int)Width, (int)Height));
-        _logger.LogDebug("保存窗口边界: {Bounds}", _savedBoundsBeforeFullscreen.Value);
     }
 
     /// <summary>
@@ -196,20 +149,8 @@ public partial class MainWindow : Window
 
         WindowState = WindowState.Normal;
 
-        if (_savedBoundsBeforeFullscreen.HasValue)
-        {
-            // 先按保存值恢复
-            var b = _savedBoundsBeforeFullscreen.Value;
-            Position = b.Position;
-            Width = b.Width;
-            Height = b.Height;
-            _logger.LogDebug("恢复保存的窗口边界: {Bounds}", b);
-        }
-        else
-        {
-            // 没保存过（首次切换等），给一个合理初值：工作区 80% 且居中
-            RestoreToReasonableDefaultSize();
-        }
+        // 默认给一个合理初值：工作区 80% 且居中
+        RestoreToReasonableDefaultSize();
 
         // 关键：无论恢复自保存值还是默认值，都做一遍"钳制到屏内"
         EnsureWindowFullyInsideScreen();
