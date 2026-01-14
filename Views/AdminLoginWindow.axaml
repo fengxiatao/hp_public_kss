@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:reactiveUi="http://reactiveui.net"
+        xmlns:vm="clr-namespace:FaceLocker.ViewModels;assembly=FaceLocker"
+        xmlns:converters="clr-namespace:FaceLocker.Converters;assembly=FaceLocker"
+        mc:Ignorable="d"
+        d:DesignWidth="640"
+        d:DesignHeight="480"
+        x:Class="FaceLocker.Views.AdminLoginWindow"
+        x:DataType="vm:AdminLoginViewModel"
+        Title="管理员登录"
+        Background="White"
+        BorderBrush="Black"
+        BorderThickness="1"
+        Width="640"
+        Height="480"
+        WindowStartupLocation="CenterScreen"
+		SystemDecorations="None"
+        CanResize="False">
+
+	<Design.DataContext>
+		<vm:AdminLoginViewModel />
+	</Design.DataContext>
+
+	<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
+		<!-- 标题 -->
+		<TextBlock Text="管理员登录"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"/>
+
+		<!-- 输入区域 -->
+		<StackPanel Spacing="10" Width="300">
+			<TextBox x:Name="UsernameTextBox"
+                     Watermark="用户名"
+                     Text="{Binding Username, Mode=TwoWay}"
+                     MaxLength="25"/>
+			<TextBox x:Name="PasswordTextBox"
+                     Watermark="密码"
+                     Text="{Binding Password, Mode=TwoWay}"
+                     MaxLength="50"
+                     PasswordChar="*"
+                     GotFocus="OnPasswordGotFocus"/>
+		</StackPanel>
+
+		<!-- 错误信息显示 -->
+		<TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="Red"
+                   HorizontalAlignment="Center"
+                   TextWrapping="Wrap"
+                   MaxWidth="280"/>
+
+		<!-- 加载指示器 -->
+		<ProgressBar Height="4"
+                     IsIndeterminate="{Binding IsLoading}"
+                     IsVisible="{Binding IsLoading}"
+                     Width="300"/>
+
+		<!-- 按钮区域 -->
+		<StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Spacing="20">
+			<Button Content="登录"
+                    Command="{Binding LoginCommand}"
+                    Width="100"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    IsDefault="True"/>
+			<Button Content="取消"
+                    Command="{Binding CancelCommand}"
+                    Width="100"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    IsCancel="True"/>
+		</StackPanel>
+	</StackPanel>
+</Window>

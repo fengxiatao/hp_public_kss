@@ -1,0 +1,170 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+
+		<!-- ARM64 优化配置 -->
+		<ServerGarbageCollection>true</ServerGarbageCollection>
+		<ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+		<RetainVMGarbageCollection>false</RetainVMGarbageCollection>
+		<TieredCompilation>true</TieredCompilation>
+		<TieredPGO>true</TieredPGO>
+
+		<!-- RK3568 特定优化 -->
+		<DebugType>portable</DebugType>
+		<Optimize>true</Optimize>
+		<TrimMode>partial</TrimMode>
+		<PublishTrimmed>false</PublishTrimmed>
+
+		<!-- 内存优化 -->
+		<InvariantGlobalization>false</InvariantGlobalization>
+		<EventSourceSupport>false</EventSourceSupport>
+		<UseSystemResourceKeys>true</UseSystemResourceKeys>
+		<RootNamespace>FaceLocker</RootNamespace>
+
+	</PropertyGroup>
+
+	<!-- ARM64 Linux 特定配置 -->
+	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+		<CrossGenDuringPublish>false</CrossGenDuringPublish>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<PublishSingleFile>false</PublishSingleFile>
+		<DefineConstants>$(DefineConstants);LINUX</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>0168;8600;8602;8603;8604;8618;</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>0168;8600;8602;8603;8604;8618;</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<AvaloniaResource Include="Assets\**" />
+		<EmbeddedResource Include="Data\**" />
+		<AvaloniaXaml Remove="Generated\**" />
+		<AvaloniaXaml Remove="TemplateEngineHost\**" />
+		<Compile Remove="Generated\**" />
+		<Compile Remove="TemplateEngineHost\**" />
+		<EmbeddedResource Remove="Generated\**" />
+		<EmbeddedResource Remove="TemplateEngineHost\**" />
+		<None Remove="Data\**" />
+		<None Remove="Generated\**" />
+		<None Remove="TemplateEngineHost\**" />
+		<!-- 配置文件 -->
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Avalonia UI 框架 -->
+		<PackageReference Include="Avalonia" Version="11.3.3" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.3.3" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.3" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.3" />
+		<PackageReference Include="ReactiveUI" Version="20.1.1" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.3.3" />
+		<PackageReference Include="Avalonia.Skia" Version="11.3.3" />
+		<PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.3" />
+		<PackageReference Include="Irihi.Ursa" Version="1.11.0" />
+		<PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.11.0" />
+		<PackageReference Include="Semi.Avalonia" Version="11.2.1.10" />
+
+		<!-- Entity Framework Core -->
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<!-- 依赖注入和配置 -->
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+
+		<!-- JSON 序列化 -->
+		<PackageReference Include="System.Text.Json" Version="8.0.5" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+		<!-- HTTP 客户端 -->
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
+
+		<!-- 串口通信 -->
+		<PackageReference Include="System.IO.Ports" Version="8.0.0" />
+
+		<!-- OpenCV 图像处理 -->
+		<PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
+
+		<!-- 图像处理 -->
+		<PackageReference Include="SkiaSharp" Version="2.88.9" />
+
+		<!-- 加密解密 -->
+		<PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
+
+		<!-- 数据验证 -->
+		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+
+		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+		<PackageReference Include="Avalonia.Diagnostics" Version="11.3.3">
+			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<!-- 百度人脸识别SDK原生库部署 -->
+	<ItemGroup>
+		<!-- 百度人脸识别SDK原生库 - RK3568开发板路径 -->
+		<!-- 注意：在RK3568开发板上，SDK库位于 /opt/face_offline_sdk/lib/armv8/ -->
+		<!-- 发布时不复制库文件，运行时直接使用系统路径 -->
+		<None Include="/opt/face_offline_sdk/lib/armv8/libbaidu_face_api.so" Condition="'$(RuntimeIdentifier)' == 'linux-arm64' and Exists('/opt/face_offline_sdk/lib/armv8/libbaidu_face_api.so')">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+			<Link>libbaidu_face_api.so</Link>
+		</None>
+		<!-- Windows开发环境的库文件 -->
+		<None Include="native\win-x64\baidu_face_api.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64' and Exists('native\win-x64\baidu_face_api.dll')">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>baidu_face_api.dll</TargetPath>
+		</None>
+	</ItemGroup>
+
+	<!-- 运行时配置 -->
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+		<RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph" Value="true" />
+		<RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.RuntimeInformation.OSDescription" Value="Linux" />
+	</ItemGroup>
+
+
+	<!-- Ubuntu 20.04 特定配置 -->
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+		<RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="false" />
+		<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+		<!-- 仅在 linux-arm64 下引用 OpenCV 运行时包 -->
+		<PackageReference Include="Citms.OpenCvSharp4.runtime.linux-ubuntu20.04-arm64" Version="4.9.0" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Folder Include="Data\" />
+	  <Folder Include="native\win-x64\" />
+	</ItemGroup>
+</Project>

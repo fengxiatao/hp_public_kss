@@ -1,0 +1,169 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:FaceLocker.ViewModels"
+		x:Class="FaceLocker.Views.MainWindow"
+		x:DataType="vm:MainWindowViewModel"
+		Title="智能柜管理系统"
+		WindowStartupLocation="CenterScreen"
+		SystemDecorations="None"
+		Width="1280"
+		Height="800"
+		WindowState="FullScreen"
+		Background="Transparent"
+		CanResize="False"
+		ZIndex="1">
+
+	<!-- 主容器 -->
+	<Grid>
+		<!-- 背景图片 -->
+		<Image Source="/Assets/background.png" Stretch="UniformToFill"/>
+
+		<!-- 半透明遮罩 -->
+		<Rectangle Fill="#20000000"/>
+
+		<!-- 顶部区域 - 警徽和标题 -->
+		<StackPanel Orientation="Horizontal"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Margin="38,38,0,0">
+
+			<!-- 警徽图标 -->
+			<Image Source="/Assets/badge.png" Width="88" Height="86"/>
+
+			<TextBlock Text="黄埔区看守所"
+					   Foreground="White"
+					   FontSize="45"
+					   FontFamily="Microsoft YaHei"
+					   VerticalAlignment="Center"
+					   Margin="25,0,0,0"/>
+		</StackPanel>
+
+		<!-- 主内容区域 -->
+		<StackPanel HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Spacing="30">
+
+			<!-- 存/取物品按钮的水平排列 -->
+			<StackPanel Orientation="Horizontal"
+						HorizontalAlignment="Center"
+						Spacing="60">
+
+				<!-- 存物品按钮 -->
+				<Button Command="{Binding StoreButtonCommand}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Width="283"
+						Height="223"
+						Background="Transparent"
+						BorderThickness="0"
+						ToolTip.Tip="存物品">
+					<Button.Styles>
+						<Style Selector="Button">
+							<Setter Property="Template">
+								<ControlTemplate>
+									<Image Source="/Assets/icon_store.png"
+										   Width="283"
+										   Height="223"
+										   Stretch="Fill"
+										   Name="PART_Image"/>
+								</ControlTemplate>
+							</Setter>
+						</Style>
+						<Style Selector="Button:pressed">
+							<Setter Property="RenderTransform">
+								<Setter.Value>
+									<ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+								</Setter.Value>
+							</Setter>
+							<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+						</Style>
+					</Button.Styles>
+				</Button>
+
+				<!-- 取物品按钮 -->
+				<Button Command="{Binding RetrieveButtonCommand}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Width="283"
+						Height="223"
+						Background="Transparent"
+						BorderThickness="0"
+						ToolTip.Tip="取物品">
+					<Button.Styles>
+						<Style Selector="Button">
+							<Setter Property="Template">
+								<ControlTemplate>
+									<Image Source="/Assets/icon_retrieve.png"
+										   Width="283"
+										   Height="223"
+										   Stretch="Fill"
+										   Name="PART_Image"/>
+								</ControlTemplate>
+							</Setter>
+						</Style>
+						<Style Selector="Button:pressed">
+							<Setter Property="RenderTransform">
+								<Setter.Value>
+									<ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+								</Setter.Value>
+							</Setter>
+							<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+						</Style>
+					</Button.Styles>
+				</Button>
+			</StackPanel>
+
+			<!-- 错误提示 -->
+			<Border IsVisible="{Binding HasSelfCheckError}"
+					Background="#DDFF5252"
+					CornerRadius="12"
+					Padding="16,12"
+					BoxShadow="0 4 16 0 #88000000"
+					MaxWidth="600"
+					HorizontalAlignment="Center">
+				<StackPanel Orientation="Horizontal"
+							Spacing="10"
+							VerticalAlignment="Center">
+					<!-- 错误信息 -->
+					<TextBlock Text="{Binding SelfCheckError}"
+							   Foreground="White"
+							   FontSize="20"
+							   FontWeight="Bold"
+							   TextAlignment="Center"
+							   TextWrapping="Wrap"
+							   VerticalAlignment="Center"
+							   MaxWidth="500"/>
+				</StackPanel>
+			</Border>
+		</StackPanel>
+
+		<!-- 右下角隐藏按钮区域 -->
+		<StackPanel HorizontalAlignment="Right"
+					VerticalAlignment="Bottom"
+					Margin="0,0,20,20"
+					Spacing="10"
+					Orientation="Horizontal">
+
+			<!-- 管理按钮（隐藏） -->
+			<Button Command="{Binding AdminMainButtonCommand}"
+					Content="管理"
+					HorizontalContentAlignment="Center"
+					VerticalContentAlignment="Center"
+					Width="60"
+					Height="60"
+					Background="Transparent"
+					BorderBrush="#80FFFFFF"
+					FontSize="12"
+					BorderThickness="1"
+					CornerRadius="30"
+					Opacity="0.3"
+					ToolTip.Tip="系统管理">
+				<Button.Styles>
+					<Style Selector="Button:pointerover">
+						<Setter Property="Opacity" Value="0.7"/>
+					</Style>
+				</Button.Styles>
+			</Button>
+		</StackPanel>
+	</Grid>
+</Window>

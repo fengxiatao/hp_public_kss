@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:FaceLocker.ViewModels.NumPad"
+			 xmlns:controls="clr-namespace:FaceLocker.Views.NumPadControls"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 Width="480"
+			 Height="390"
+			 x:Class="FaceLocker.Views.NumPad.NumPadDialogView"
+			 x:DataType="vm:NumPadDialogViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:NumPadDialogViewModel />
+	</Design.DataContext>
+	<Border Background="White"
+			CornerRadius="10"
+			Padding="20"
+			BoxShadow="4 4 10 0 #000000">
+		<controls:NumPadControl Text="{Binding InputValue}" EnterCommand="{Binding EnterPressed}"></controls:NumPadControl>
+	</Border>
+</UserControl>

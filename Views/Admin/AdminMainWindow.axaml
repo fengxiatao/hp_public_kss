@@ -1,0 +1,206 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+        xmlns:vm="clr-namespace:FaceLocker.ViewModels"
+        xmlns:views="clr-namespace:FaceLocker.Views"
+        xmlns:converters="clr-namespace:FaceLocker.Converters"
+        x:Class="FaceLocker.Views.AdminMainWindow"
+        Title="管理员主窗口"
+        WindowState="Normal"
+        CanResize="False"
+        Width="1280"
+        Height="800">
+
+    <Window.Styles>
+        <!-- 为选项卡按钮定义专用样式类 -->
+        <Style Selector="Button.tab-button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,5"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <!-- 悬停状态 -->
+        <Style Selector="Button.tab-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#50FFFFFF"/>
+        </Style>
+        
+        <!-- 按下状态 -->
+        <Style Selector="Button.tab-button:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#80FFFFFF"/>
+        </Style>
+
+        <!-- 选中状态 -->
+        <Style Selector="Button.tab-button.selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#3498db"/>
+            <Setter Property="TextElement.FontWeight" Value="Bold"/>
+        </Style>
+    </Window.Styles>
+
+    <Window.DataTemplates>
+        <DataTemplate DataType="vm:AdminLockViewModel" x:DataType="vm:AdminLockViewModel">
+            <views:AdminLockView DataContext="{Binding}"/>
+        </DataTemplate>
+
+        <DataTemplate DataType="vm:AdminAccessLogViewModel" x:DataType="vm:AdminAccessLogViewModel">
+            <views:AdminAccessLogView DataContext="{Binding}"/>
+        </DataTemplate>
+
+        <DataTemplate DataType="vm:AdminUserViewModel" x:DataType="vm:AdminUserViewModel">
+            <views:AdminUserView DataContext="{Binding}"/>
+        </DataTemplate>
+
+        <DataTemplate DataType="vm:AdminSettingsViewModel" x:DataType="vm:AdminSettingsViewModel">
+            <views:AdminSettingsView DataContext="{Binding}"/>
+        </DataTemplate>
+    </Window.DataTemplates>
+
+    <Grid x:DataType="vm:AdminMainViewModel">
+        <!-- 背景图片 -->
+        <Image Source="/Assets/background.png" Stretch="UniformToFill"/>
+
+        <Grid Margin="10,10,10,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>    <!-- 顶部徽章和标题 -->
+                <RowDefinition Height="Auto"/>    <!-- 选项卡区域 -->
+                <RowDefinition Height="*"/>       <!-- 内容区域 -->
+                <RowDefinition Height="Auto"/>    <!-- 底部状态栏 -->
+            </Grid.RowDefinitions>
+
+            <!-- 1. 顶部徽章和标题 -->
+            <Border Grid.Row="0" Background="Transparent" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 左侧徽章和标题 -->
+                    <StackPanel Grid.Column="0" 
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Spacing="25">
+                        <Image Source="/Assets/badge.png"
+                               Width="88"
+                               Height="66"
+                               VerticalAlignment="Center"/>
+                        <TextBlock Text="智能柜管理"
+                                   FontSize="45"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 右上角关闭按钮 -->
+                    <Button Grid.Column="1"
+                            Content="✕"
+                            Command="{Binding CloseCommand}"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Background="Transparent"
+                            BorderBrush="#80FFFFFF"
+                            Width="50"
+                            Height="50"
+                            FontSize="12"
+                            BorderThickness="1"
+					        CornerRadius="25"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top">
+                        <Button.Styles>
+                           <Style Selector="Button:pointerover">
+                                <Setter Property="Background" Value="#50FF0000"/>
+                            </Style>
+                        </Button.Styles>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- 2. 选项卡区域 -->
+            <Border Grid.Row="1"
+                    Background="#2c3e50"
+                    Height="50"
+                    Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" Spacing="0">
+                    <!-- 使用Classes.selected绑定来控制选中状态 -->
+                    <Button Classes="tab-button"
+                            Classes.selected="{Binding IsLockersSelected}"
+                            x:Name="LockersTabButton"
+                            Content="锁柜管理"
+                            Command="{Binding SwitchToLockersCommand}"
+                            CommandParameter="Lockers"/>
+
+                    <Button Classes="tab-button"
+                            Classes.selected="{Binding IsAccessLogsSelected}"
+                            x:Name="AccessLogsTabButton"
+                            Content="开锁日志"
+                            Command="{Binding SwitchToAccessLogsCommand}"
+                            CommandParameter="AccessLogs"/>
+                    
+                    <Button Classes="tab-button"
+                            Classes.selected="{Binding IsUsersSelected}"
+                            x:Name="UsersTabButton"
+                            Content="用户管理"
+                            Command="{Binding SwitchToUsersCommand}"
+                            CommandParameter="Users"/>
+                    
+                    <Button Classes="tab-button"
+                            Classes.selected="{Binding IsSettingsSelected}"
+                            x:Name="SettingsTabButton"
+                            Content="系统设置"
+                            Command="{Binding SwitchToSettingsCommand}"
+                            CommandParameter="Settings"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 3. 内容区域 -->
+            <Border Grid.Row="2"
+                    Background="Transparent"
+                    Margin="0,0,0,0">
+                <ContentControl Content="{Binding CurrentContent}" />
+            </Border>
+
+            <!-- 4. 底部状态栏 -->
+            <Border Grid.Row="3"
+                    Background="#2c3e50"
+                    Height="40"
+                    HorizontalAlignment="Stretch">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 左侧状态信息 -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="20" Margin="20,0,0,0">
+                        <TextBlock Text="当前用户: 管理员"
+                                   Foreground="White"
+                                   FontSize="14"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 右侧时间信息 -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="20" Margin="0,0,20,0">
+                        <TextBlock Text="{Binding CurrentTime}"
+                                   Foreground="White"
+                                   FontSize="14"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding CurrentDate}"
+                                   Foreground="White"
+                                   FontSize="14"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

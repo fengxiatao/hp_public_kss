@@ -1,0 +1,407 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:FaceLocker.ViewModels"
+		xmlns:converters="clr-namespace:FaceLocker.Converters;assembly=FaceLocker"
+		xmlns:u="https://irihi.tech/ursa"
+		xmlns:controls="clr-namespace:FaceLocker.Views.NumPadControls"
+		xmlns:videocontrols="clr-namespace:FaceLocker.Views.Controls"
+		x:Class="FaceLocker.Views.StoreWindow"
+		x:DataType="vm:StoreWindowViewModel"
+		Title="存放物品"
+		WindowStartupLocation="CenterScreen"
+		Width="1280"
+		Height="800"
+		WindowState="FullScreen"
+		CanResize="False"
+		SystemDecorations="None"
+		Background="Transparent"
+		FontFamily="Microsoft YaHei">
+
+	<Grid>
+		<Image Source="/Assets/background.png" Stretch="UniformToFill"/>
+		<Grid ColumnDefinitions="640,640">
+			<StackPanel Grid.Column="0">
+				<Grid Height="69" Margin="50,30,0,0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="71"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Image Source="/Assets/badge.png"
+						   Width="71"
+						   Height="69"
+						   HorizontalAlignment="Left"/>
+					<TextBlock Grid.Column="1"
+							   Text="黄埔看守所"
+							   Foreground="White"
+							   FontSize="42"
+							   FontWeight="SemiBold"
+							   VerticalAlignment="Center"
+							   Margin="20,0,0,0"
+							   Width="420"/>
+				</Grid>
+				<Border Width="540"
+						Height="405"
+						HorizontalAlignment="Left"
+						Background="#000000"
+						CornerRadius="8"
+						BorderBrush="#CCCCCC"
+						BorderThickness="1"
+						Margin="50,48,0,0">
+					<Grid>
+						<!-- 原生视频显示（零拷贝渲染，推荐）
+						     GStreamer 直接渲染到此控件，不经过 UI 线程
+						     CPU 占用极低，适合 RK3568 (2G RAM) -->
+						<videocontrols:NativeVideoHost 
+							Name="NativeVideoHost"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							IsVisible="{Binding UseNativeVideoMode}"/>
+						
+						<!-- 人脸框覆盖层
+						     在视频上方绘制人脸框（支持原生和软件渲染模式）
+						     使用高 ZIndex 确保在原生窗口上方 -->
+						<videocontrols:FaceBoxOverlay 
+							Name="FaceBoxOverlay"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							FaceBoxes="{Binding FaceBoxes}"
+							SourceWidth="{Binding CameraWidth}"
+							SourceHeight="{Binding CameraHeight}"
+							BoxBrush="#00FF00"
+							BoxThickness="3"
+							IsHitTestVisible="False"
+							ZIndex="100"/>
+						
+						<!-- 软件渲染模式后备（WriteableBitmap）
+						     当原生模式不可用时使用 -->
+						<Image Name="CameraVideoDisplay"
+							   Source="{Binding CameraVideoElement}"
+							   Stretch="Uniform"
+							   HorizontalAlignment="Center"
+							   VerticalAlignment="Center"
+							   IsVisible="{Binding !UseNativeVideoMode}"/>
+
+						<!-- 摄像头未连接提示 -->
+						<Border IsVisible="{Binding ShowCameraNotConnected}"
+								Background="#000000"
+								CornerRadius="8">
+							<StackPanel HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Spacing="15">
+								<TextBlock Text="摄像头连接中..."
+										   Foreground="White"
+										   FontSize="18"
+										   FontWeight="SemiBold"/>
+							</StackPanel>
+						</Border>
+					</Grid>
+				</Border>
+
+				<!-- 用户头像和拍照按钮 -->
+				<Grid Margin="50,68,0,0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="200"/>
+						<ColumnDefinition Width="45"/>
+						<ColumnDefinition Width="295"/>
+					</Grid.ColumnDefinitions>
+
+					<!-- 用户头像 -->
+					<Border Grid.Column="0"
+							Width="200"
+							Height="150"
+							Background="#333333"
+							CornerRadius="8"
+							BorderBrush="#CCCCCC"
+							BorderThickness="1">
+						<Image Source="{Binding UserAvatar}"
+							   Stretch="Uniform"
+							   HorizontalAlignment="Center"
+							   VerticalAlignment="Center"/>
+					</Border>
+
+					<!-- 拍照按钮 -->
+					<Button Grid.Column="2"
+							Name="ReTakeButton"
+							Content="重拍"
+							Command="{Binding ReTakeCommand}"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Width="295"
+							Height="150"
+							FontSize="28"
+							FontWeight="SemiBold"
+							CornerRadius="8"
+							Foreground="White">
+						<Button.Styles>
+							<!-- 正常状态样式 -->
+							<Style Selector="Button:not(:disabled)">
+								<Setter Property="Background" Value="#17B0F7"/>
+								<Setter Property="BorderBrush" Value="#1398D9"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+
+							<!-- 鼠标悬停状态 - 使用稍深的颜色 -->
+							<Style Selector="Button:not(:disabled):pointerover">
+								<Setter Property="Background" Value="#1498D7"/>
+								<Setter Property="BorderBrush" Value="#1180B9"/>
+							</Style>
+
+							<!-- 按下状态 - 使用更深的颜色 -->
+							<Style Selector="Button:not(:disabled):pressed">
+								<Setter Property="Background" Value="#1180B7"/>
+								<Setter Property="BorderBrush" Value="#0F68A7"/>
+								<Setter Property="RenderTransform">
+									<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+								</Setter>
+								<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+							</Style>
+
+							<!-- 禁用状态 -->
+							<Style Selector="Button:disabled">
+								<Setter Property="Background" Value="#CCCCCC"/>
+								<Setter Property="BorderBrush" Value="#AAAAAA"/>
+								<Setter Property="Foreground" Value="#888888"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+						</Button.Styles>
+					</Button>
+				</Grid>
+			</StackPanel>
+
+			<!-- ========== 右列 ========== -->
+			<StackPanel Grid.Column="1">
+
+				<!-- 提示区文本 -->
+				<TextBlock Text="{Binding SystemPrompt}"
+						   FontSize="32"
+						   Foreground="#FFFF00"
+						   FontWeight="Bold"
+						   HorizontalAlignment="Left"
+						   TextWrapping="Wrap"
+						   TextAlignment="Left"
+						   Height="67"
+						   Margin="0,50,0,0"/>
+
+				<!-- 数字键盘 -->
+				<Border Width="536"
+						Height="405"
+						HorizontalAlignment="Left"
+						Background="Transparent"
+						Margin="0,30,0,0">
+					<controls:NumPadControl
+					Text="{Binding PhoneNumber}"
+					EnterCommand="{Binding SubmitCommand}"
+					IsEnabled="{Binding IsSubmitButtonVisible}"/>
+				</Border>
+
+				<!-- 分配柜子和返回主界面按钮 -->
+				<Grid Margin="0,68,0,0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="250"/>
+						<ColumnDefinition Width="36"/>
+						<ColumnDefinition Width="250"/>
+					</Grid.ColumnDefinitions>
+
+					<!-- 分配柜子按钮 -->
+					<Button Grid.Column="0"
+							Name="SubmitButton"
+							Content="分配柜子"
+							Command="{Binding SubmitCommand}"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Width="250"
+							Height="150"
+							FontSize="28"
+							FontWeight="SemiBold"
+							CornerRadius="8"
+							Foreground="White"
+							IsEnabled="{Binding IsSubmitEnabled}"
+							IsVisible="{Binding IsSubmitButtonVisible}">
+						<Button.Styles>
+							<!-- 正常状态样式 -->
+							<Style Selector="Button:not(:disabled)">
+								<Setter Property="Background" Value="#2DB281"/>
+								<Setter Property="BorderBrush" Value="#269A71"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+
+							<!-- 鼠标悬停状态 - 使用稍深的颜色 -->
+							<Style Selector="Button:not(:disabled):pointerover">
+								<Setter Property="Background" Value="#269A71"/>
+								<Setter Property="BorderBrush" Value="#1F8261"/>
+							</Style>
+
+							<!-- 按下状态 - 使用更深的颜色 -->
+							<Style Selector="Button:not(:disabled):pressed">
+								<Setter Property="Background" Value="#1F8261"/>
+								<Setter Property="BorderBrush" Value="#186A51"/>
+								<Setter Property="RenderTransform">
+									<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+								</Setter>
+								<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+							</Style>
+
+							<!-- 禁用状态 -->
+							<Style Selector="Button:disabled">
+								<Setter Property="Background" Value="#CCCCCC"/>
+								<Setter Property="BorderBrush" Value="#AAAAAA"/>
+								<Setter Property="Foreground" Value="#888888"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+						</Button.Styles>
+					</Button>
+
+					<!-- 开启柜门按钮 -->
+					<Button Grid.Column="0"
+							Name="OpenLockerButton"
+							Content="开启柜门"
+							Command="{Binding OpenLockerCommand}"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Width="250"
+							Height="150"
+							FontSize="28"
+							FontWeight="SemiBold"
+							CornerRadius="8"
+							Foreground="White"
+							IsVisible="{Binding IsOpenLockerButtonVisible}">
+						<Button.Styles>
+							<!-- 正常状态样式 -->
+							<Style Selector="Button:not(:disabled)">
+								<Setter Property="Background" Value="#2DB281"/>
+								<Setter Property="BorderBrush" Value="#269A71"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+
+							<!-- 鼠标悬停状态 - 使用稍深的颜色 -->
+							<Style Selector="Button:not(:disabled):pointerover">
+								<Setter Property="Background" Value="#269A71"/>
+								<Setter Property="BorderBrush" Value="#1F8261"/>
+							</Style>
+
+							<!-- 按下状态 - 使用更深的颜色 -->
+							<Style Selector="Button:not(:disabled):pressed">
+								<Setter Property="Background" Value="#1F8261"/>
+								<Setter Property="BorderBrush" Value="#186A51"/>
+								<Setter Property="RenderTransform">
+									<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+								</Setter>
+								<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+							</Style>
+
+							<!-- 禁用状态 -->
+							<Style Selector="Button:disabled">
+								<Setter Property="Background" Value="#CCCCCC"/>
+								<Setter Property="BorderBrush" Value="#AAAAAA"/>
+								<Setter Property="Foreground" Value="#888888"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+						</Button.Styles>
+					</Button>
+
+					<!-- 返回主界面按钮 -->
+					<Button Grid.Column="2"
+							Name="ReturnButton"
+							Content="返回主界面"
+							Command="{Binding ReturnToMainCommand}"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Width="250"
+							Height="150"
+							FontSize="28"
+							FontWeight="SemiBold"
+							CornerRadius="8"
+							Foreground="White">
+						<Button.Styles>
+							<!-- 正常状态样式 -->
+							<Style Selector="Button:not(:disabled)">
+								<Setter Property="Background" Value="#1890FF"/>
+								<Setter Property="BorderBrush" Value="#1478D7"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+
+							<!-- 鼠标悬停状态 - 使用稍深的颜色 -->
+							<Style Selector="Button:not(:disabled):pointerover">
+								<Setter Property="Background" Value="#1478D7"/>
+								<Setter Property="BorderBrush" Value="#1060B7"/>
+							</Style>
+
+							<!-- 按下状态 - 使用更深的颜色 -->
+							<Style Selector="Button:not(:disabled):pressed">
+								<Setter Property="Background" Value="#1060B7"/>
+								<Setter Property="BorderBrush" Value="#0C48A7"/>
+								<Setter Property="RenderTransform">
+									<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+								</Setter>
+								<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+							</Style>
+
+							<!-- 禁用状态 -->
+							<Style Selector="Button:disabled">
+								<Setter Property="Background" Value="#CCCCCC"/>
+								<Setter Property="BorderBrush" Value="#AAAAAA"/>
+								<Setter Property="Foreground" Value="#888888"/>
+								<Setter Property="BorderThickness" Value="2"/>
+							</Style>
+						</Button.Styles>
+					</Button>
+				</Grid>
+			</StackPanel>
+		</Grid>
+
+		<!-- 倒计时提示（全屏覆盖） -->
+		<Border IsVisible="{Binding ShowCountdown}"
+				Background="Transparent"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center"
+				ZIndex="999">
+			<TextBlock Text="{Binding CountdownText}"
+					   FontSize="36"
+					   Foreground="White"
+					   FontWeight="Bold"
+					   Background="#80000000"
+					   Padding="20"/>
+		</Border>
+
+		<!-- 柜子名称弹窗 -->
+		<Border IsVisible="{Binding ShowLockerMask}"
+				Background="Transparent"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center"
+				ZIndex="9998"
+				Width="700"
+				Height="550"
+				CornerRadius="0"
+				Padding="0"
+				BorderThickness="0">
+			<!-- 柜子名称显示 -->
+			<Border Background="Transparent"
+					Width="650"
+					Height="400"
+					CornerRadius="0"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center">
+				<TextBlock Text="{Binding MaskLockerName}"
+						   FontSize="240"
+						   Foreground="#FFFF00"
+						   HorizontalAlignment="Center"
+						   VerticalAlignment="Center"
+						   TextAlignment="Center"
+						   FontWeight="Bold"/>
+			</Border>
+		</Border>
+
+		<!-- OverlayDialogHost -->
+		<u:OverlayDialogHost ZIndex="9999"/>
+	</Grid>
+</Window>

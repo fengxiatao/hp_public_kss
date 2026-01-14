@@ -1,0 +1,349 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:FaceLocker.ViewModels"
+		xmlns:converters="clr-namespace:FaceLocker.Converters;assembly=FaceLocker"
+		xmlns:u="https://irihi.tech/ursa"
+		xmlns:videocontrols="clr-namespace:FaceLocker.Views.Controls"
+		x:Class="FaceLocker.Views.RetrieveWindow"
+		x:DataType="vm:RetrieveWindowViewModel"
+		Title="取出物品"
+		WindowStartupLocation="CenterScreen"
+		Width="1280"
+		Height="800"
+		WindowState="FullScreen"
+		CanResize="False"
+		SystemDecorations="None"
+		Background="Transparent"
+		FontFamily="Microsoft YaHei">
+
+	<Grid>
+		<Image Source="/Assets/background.png" Stretch="UniformToFill"/>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/> <!-- 第一栏：标题栏 -->
+				<RowDefinition Height="*"/>    <!-- 第二栏：左右内容 -->
+				<RowDefinition Height="Auto"/> <!-- 第三栏：按钮区 -->
+			</Grid.RowDefinitions>
+
+			<!-- 第一栏：标题栏 -->
+			<Grid Grid.Row="0">
+				<!-- 警徽图标 -->
+				<Image Source="/Assets/badge.png"
+					   Width="71"
+					   Height="69"
+					   HorizontalAlignment="Left"
+					   VerticalAlignment="Top"
+					   Margin="50,30,0,0"/>
+
+				<!-- 标题 -->
+				<TextBlock Text="黄埔看守所"
+						   Foreground="White"
+						   FontSize="42"
+						   FontFamily="Microsoft YaHei"
+						   HorizontalAlignment="Left"
+						   VerticalAlignment="Top"
+						   Margin="141,30,0,0"
+						   Width="420"/>
+			</Grid>
+
+			<!-- 第二栏：左右内容 -->
+			<Grid Grid.Row="1" Margin="0,53,0,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="677"/> <!-- 左列 -->
+					<ColumnDefinition Width="603"/> <!-- 右列 -->
+				</Grid.ColumnDefinitions>
+
+				<!-- 左列：摄像头视频 -->
+				<Border Grid.Column="0"
+						Width="540"
+						Height="405"
+						HorizontalAlignment="Left"
+						VerticalAlignment="Top"
+						Margin="50,0,0,0"
+						Background="#000000"
+						CornerRadius="8"
+						BorderBrush="#CCCCCC"
+						BorderThickness="1">
+					<Grid>
+						<!-- 原生视频显示（零拷贝渲染，推荐）
+						     GStreamer 直接渲染到此控件，不经过 UI 线程
+						     CPU 占用极低，适合 RK3568 (2G RAM) -->
+						<videocontrols:NativeVideoHost 
+							Name="NativeVideoHost"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							IsVisible="{Binding UseNativeVideoMode}"/>
+						
+						<!-- 人脸框覆盖层
+						     在视频上方绘制人脸框（支持原生和软件渲染模式）
+						     使用高 ZIndex 确保在原生窗口上方 -->
+						<videocontrols:FaceBoxOverlay 
+							Name="FaceBoxOverlay"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Stretch"
+							FaceBoxes="{Binding FaceBoxes}"
+							SourceWidth="{Binding CameraWidth}"
+							SourceHeight="{Binding CameraHeight}"
+							BoxBrush="#00FF00"
+							BoxThickness="3"
+							IsHitTestVisible="False"
+							ZIndex="100"/>
+						
+						<!-- 软件渲染模式后备（WriteableBitmap）
+						     当原生模式不可用时使用 -->
+						<Image Name="CameraVideoDisplay"
+							   Source="{Binding CameraVideoElement}"
+							   Stretch="Uniform"
+							   HorizontalAlignment="Center"
+							   VerticalAlignment="Center"
+							   IsVisible="{Binding !UseNativeVideoMode}"/>
+
+						<!-- 摄像头未连接提示 -->
+						<Border IsVisible="{Binding ShowCameraNotConnected}"
+								Background="#000000"
+								CornerRadius="8">
+							<StackPanel HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Spacing="15">
+								<TextBlock Text="摄像头连接中..."
+										   Foreground="White"
+										   FontSize="18"
+										   FontWeight="SemiBold"/>
+							</StackPanel>
+						</Border>
+
+						<!-- 人脸检测倒计时提示 -->
+						<Border IsVisible="{Binding IsFaceDetectionTimeout}"
+								Background="Transparent"
+								CornerRadius="8">
+							<StackPanel HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Background="Transparent"
+										Spacing="10">
+								<TextBlock Text="{Binding FaceDetectionRemainingSeconds, StringFormat='{}{0}秒后返回主界面'}"
+										   Foreground="White"
+										   Background="Transparent"
+										   FontSize="22"
+										   FontWeight="Bold"/>
+							</StackPanel>
+						</Border>
+					</Grid>
+				</Border>
+
+				<!-- 右列：用户信息区域和提示内容区域 -->
+				<Grid Grid.Column="1"
+					  HorizontalAlignment="Left"
+					  VerticalAlignment="Top">
+
+					<!-- 用户信息区域（当有识别结果且没有系统提示时显示） -->
+					<Grid x:Name="UserInfoArea"
+						  IsVisible="{Binding SystemPrompt, Converter={x:Static converters:StringToBoolConverter.Default}, ConverterParameter='inverse'}">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/> <!-- 用户头像 -->
+							<RowDefinition Height="Auto"/> <!-- 手机号码行 -->
+							<RowDefinition Height="Auto"/> <!-- 柜号行 -->
+							<RowDefinition Height="Auto"/> <!-- 空行，用于占位 -->
+						</Grid.RowDefinitions>
+
+						<!-- 用户头像 -->
+						<Border Grid.Row="0"
+								Width="200"
+								Height="150"
+								HorizontalAlignment="Left"
+								Background="Transparent"
+								Margin="0,0,0,0">
+							<Image Source="{Binding UserAvatar}"
+								   Stretch="Uniform"
+								   HorizontalAlignment="Left"
+								   VerticalAlignment="Center"/>
+						</Border>
+
+						<!-- 手机号码行 -->
+						<Grid Grid.Row="1"
+							  Margin="0,54,0,0"
+							  Height="50"
+							  VerticalAlignment="Center">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="180"/>
+								<ColumnDefinition Width="270"/>
+							</Grid.ColumnDefinitions>
+
+							<!-- 手机号码静态文本 -->
+							<TextBlock Grid.Column="0"
+									   Text="手机号码："
+									   Foreground="White"
+									   FontSize="36"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Left"/>
+
+							<!-- 手机号码动态文本 -->
+							<TextBlock Grid.Column="1"
+									   Text="{Binding PhoneNumber}"
+									   Foreground="#FFFFFF"
+									   FontSize="36"
+									   FontWeight="Bold"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Left"
+									   Margin="10,0,0,0"/>
+						</Grid>
+
+						<!-- 柜号行 -->
+						<Grid Grid.Row="2"
+							  Margin="0,54,0,0"
+							  Height="101"
+							  VerticalAlignment="Center"
+							  HorizontalAlignment="Left">
+
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="158"/>
+								<ColumnDefinition Width="290"/>
+							</Grid.ColumnDefinitions>
+
+							<!-- 柜号静态文本 -->
+							<TextBlock Grid.Column="0"
+									   Text="柜        号："
+									   Foreground="White"
+									   FontSize="36"
+									   VerticalAlignment="Bottom"
+									   HorizontalAlignment="Left"/>
+
+							<!-- 柜号内容动态文本 -->
+							<Border Grid.Column="1"
+									VerticalAlignment="Bottom"
+									HorizontalAlignment="Left"
+									Margin="32,28,0,0"
+									Height="101"
+									Width="290">
+								<TextBlock Text="{Binding LockerName}"
+										   Foreground="#FFFF00"
+										   FontSize="72"
+										   FontWeight="Bold"/>
+							</Border>
+						</Grid>
+
+						<!-- 空行占位，保持布局一致 -->
+						<Border Grid.Row="3"
+								Height="54"/>
+					</Grid>
+
+					<!-- 提示内容区域（当有系统提示时显示） -->
+					<TextBlock x:Name="PromptArea"
+							   Text="{Binding SystemPrompt}"
+							   Foreground="#FFFFFF"
+							   FontSize="48"
+							   FontWeight="Bold"
+							   HorizontalAlignment="Left"
+							   VerticalAlignment="Top"
+							   TextWrapping="Wrap"
+							   Margin="0,0,0,0"
+							   IsVisible="{Binding SystemPrompt, Converter={x:Static converters:StringToBoolConverter.Default}}"/>
+				</Grid>
+			</Grid>
+
+			<!-- 第三栏：按钮区 -->
+			<Grid Grid.Row="2" Margin="0,68,0,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+
+				<!-- 确认开柜按钮 -->
+				<Button Grid.Column="1"
+						Name="ConfirmOpenLockerButton"
+						Content="确认开柜"
+						Command="{Binding ConfirmOpenLockerCommand}"
+						IsEnabled="{Binding IsConfirmOpenLockerEnabled}"
+						HorizontalAlignment="Right"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Width="250"
+						Height="150"
+						FontSize="36"
+						FontWeight="SemiBold"
+						CornerRadius="8"
+						Foreground="White"
+						Margin="0,0,36,0">
+					<Button.Background>
+						<SolidColorBrush Color="#2DB281"/>
+					</Button.Background>
+
+					<Button.Styles>
+						<!-- 鼠标停留效果：颜色变深 -->
+						<Style Selector="Button:pointerover">
+							<Setter Property="Background">
+								<SolidColorBrush Color="#1E9A73"/>
+							</Setter>
+						</Style>
+
+						<!-- 按下效果：颜色变浅 -->
+						<Style Selector="Button:pressed">
+							<Setter Property="Background">
+								<SolidColorBrush Color="#52C09B"/>
+							</Setter>
+							<Setter Property="RenderTransform">
+								<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+							</Setter>
+							<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+						</Style>
+
+						<!-- 禁用状态 -->
+						<Style Selector="Button:disabled">
+							<Setter Property="Background">
+								<SolidColorBrush Color="#9CA3AF"/>
+							</Setter>
+							<Setter Property="Foreground">
+								<SolidColorBrush Color="#D1D5DB"/>
+							</Setter>
+						</Style>
+					</Button.Styles>
+				</Button>
+
+				<!-- 返回主界面按钮 -->
+				<Button Grid.Column="2"
+						Name="ReturnButton"
+						Content="返回主界面"
+						Command="{Binding ReturnToMainCommand}"
+						HorizontalAlignment="Right"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Width="250"
+						Height="150"
+						FontSize="36"
+						FontWeight="SemiBold"
+						CornerRadius="8"
+						Foreground="White"
+						Margin="0,0,50,0">
+					<Button.Background>
+						<SolidColorBrush Color="#1890FF"/>
+					</Button.Background>
+
+					<Button.Styles>
+						<!-- 鼠标停留效果：颜色变深 -->
+						<Style Selector="Button:pointerover">
+							<Setter Property="Background">
+								<SolidColorBrush Color="#096DD9"/>
+							</Setter>
+						</Style>
+
+						<!-- 按下效果：颜色变浅 -->
+						<Style Selector="Button:pressed">
+							<Setter Property="Background">
+								<SolidColorBrush Color="#40A9FF"/>
+							</Setter>
+							<Setter Property="RenderTransform">
+								<ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+							</Setter>
+							<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+						</Style>
+					</Button.Styles>
+				</Button>
+			</Grid>
+		</Grid>
+
+		<!-- 覆盖对话框宿主 -->
+		<u:OverlayDialogHost ZIndex="9999"/>
+	</Grid>
+</Window>

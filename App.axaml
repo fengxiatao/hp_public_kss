@@ -1,0 +1,31 @@
+﻿<Application xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 x:Class="FaceLocker.App"
+			 xmlns:local="using:FaceLocker"
+             xmlns:converters="using:FaceLocker.Converters"
+			 xmlns:semi="https://irihi.tech/semi"
+			 xmlns:u-Semi="https://irihi.tech/ursa/themes/semi">
+
+	<Application.DataTemplates>
+		<local:ViewLocator/>
+	</Application.DataTemplates>
+
+	<Application.Resources>
+		<converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+	</Application.Resources>
+
+
+	<Application.Styles>
+		<semi:SemiTheme />
+		<u-Semi:SemiTheme />
+
+		<Style Selector="OverlayLayer">
+			<!-- 移除淡入淡出动画 -->
+			<Setter Property="Transitions" Value="{x:Null}" />
+			<!-- 设置背景为完全透明（无遮罩） -->
+			<Setter Property="Background" Value="Transparent" />
+			<!-- 可选：立即显示，不渐变 -->
+			<Setter Property="Opacity" Value="1" />
+		</Style>
+	</Application.Styles>
+</Application>

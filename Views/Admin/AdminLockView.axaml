@@ -1,0 +1,549 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             xmlns:vm="clr-namespace:FaceLocker.ViewModels"
+             xmlns:conv="clr-namespace:FaceLocker.Converters"
+             x:DataType="vm:AdminLockViewModel"
+             x:Class="FaceLocker.Views.AdminLockView"
+             x:Name="AdminLockControl">
+
+    <UserControl.Styles>
+        <!-- 格子按钮样式 -->
+        <Style Selector="Button.locker-button">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="#979797"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="72"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.locker-button:pointerover">
+            <Setter Property="Background" Value="#F0F0F0"/>
+            <Setter Property="BorderBrush" Value="#0069C0"/>
+        </Style>
+
+        <Style Selector="Button.locker-button:disabled">
+            <Setter Property="Opacity" Value="0.5"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+            <Setter Property="Background" Value="#E0E0E0"/>
+        </Style>
+    </UserControl.Styles>
+
+    <UserControl.Resources>
+        <conv:SmallLockerStatusToEnabledConverter x:Key="SmallLockerStatusToEnabledConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+
+        <Grid Margin="0">
+            <!-- 柜子区和一键清柜按钮为子Grid -->
+            <Grid Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--文本区域：对齐柜子区左边 -->
+                <StackPanel Orientation="Horizontal" Spacing="15">
+                    <!-- 主机名 -->
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <TextBlock Text="主机名："
+                                   FontSize="20"
+                                   Foreground="Black"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding DeviceName}"
+                                   FontSize="20"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- IP地址 -->
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <TextBlock Text="IP地址："
+                                   FontSize="20"
+                                   Foreground="Black"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding IPAddress}"
+                                   FontSize="20"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 柜组名称 -->
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <TextBlock Text="柜组名称："
+                                   FontSize="20"
+                                   Foreground="Black"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding GroupName}"
+                                   FontSize="20"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 按钮区域：对齐柜子区右边 -->
+                <Button Grid.Row="0" Grid.Column="0"
+                        Content="一键清柜"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,0,12"
+                        Padding="16,6"
+                        Height="32"
+                        FontSize="16"
+                        Foreground="#FFFFFF"
+                        Background="#5BBC72"
+                        Command="{Binding ClearAllCommand}"
+                        IsEnabled="{Binding CanClearAll}"/>
+
+                <!-- 柜子区域（带边框和背景） -->
+                <Border Grid.Row="1" Grid.Column="0"
+                        BorderBrush="#FFFFFF"
+                        BorderThickness="1"
+                        Background="#FFFFFF"
+                        Width="1158"
+                        Height="485">
+                    <ItemsControl ItemsSource="{Binding Lockers}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10" FlowDirection="{Binding LockerFlowDirection}"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LockerItem">
+                                <Border BoxShadow="0 0 10 0 #4D000000"
+                                        Width="223.5" Height="485"
+                                        BorderBrush="#979797" BorderThickness="2" Background="#ffffff">
+                                    <Grid Margin="0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="38.5"/>
+                                            <RowDefinition Height="74"/>
+                                            <RowDefinition Height="74"/>
+                                            <RowDefinition Height="74"/>
+                                            <RowDefinition Height="74"/>
+                                            <RowDefinition Height="74"/>
+                                            <RowDefinition Height="74"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- 柜子标题 -->
+                                        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                                Background="#0069C0" BorderBrush="#979797" BorderThickness="1" CornerRadius="0">
+                                            <TextBlock Text="{Binding GroupName}"
+                                                       FontSize="18" FontWeight="Bold" Foreground="White"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- 第1行第1列 - 01 -->
+                                        <Button Grid.Row="1" Grid.Column="0"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[0]}"
+                                                IsEnabled="{Binding SmallLockers[0].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[0].DisplayColor}">
+                                                        <Grid>
+                                                            <!-- 正常状态显示数字 -->
+                                                            <TextBlock Text="{Binding SmallLockers[0].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                                            <!-- 打开状态显示图标 -->
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[0].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第2行第1列 - 02 -->
+                                        <Button Grid.Row="2" Grid.Column="0"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[1]}"
+                                                IsEnabled="{Binding SmallLockers[1].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[1].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[1].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[1].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第3行第1列 - 03 -->
+                                        <Button Grid.Row="3" Grid.Column="0"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[2]}"
+                                                IsEnabled="{Binding SmallLockers[2].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[2].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[2].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[2].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第4行第1列 - 04 -->
+                                        <Button Grid.Row="4" Grid.Column="0"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[3]}"
+                                                IsEnabled="{Binding SmallLockers[3].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[3].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[3].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[3].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第5行第1列 - 05 -->
+                                        <Button Grid.Row="5" Grid.Column="0"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[4]}"
+                                                IsEnabled="{Binding SmallLockers[4].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[4].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[4].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[4].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第6行第1列 - 06 -->
+                                        <Button Grid.Row="6" Grid.Column="0"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[5]}"
+                                                IsEnabled="{Binding SmallLockers[5].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[5].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[5].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[5].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第1行第2列 - 07 -->
+                                        <Button Grid.Row="1" Grid.Column="1"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[6]}"
+                                                IsEnabled="{Binding SmallLockers[6].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[6].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[6].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[6].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第2行第2列 - 08 -->
+                                        <Button Grid.Row="2" Grid.Column="1"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[7]}"
+                                                IsEnabled="{Binding SmallLockers[7].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[7].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[7].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[7].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第3行第2列 - 09 -->
+                                        <Button Grid.Row="3" Grid.Column="1"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[8]}"
+                                                IsEnabled="{Binding SmallLockers[8].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[8].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[8].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[8].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第4行第2列 - 10 -->
+                                        <Button Grid.Row="4" Grid.Column="1"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[9]}"
+                                                IsEnabled="{Binding SmallLockers[9].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[9].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[9].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[9].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第5行第2列 - 11 -->
+                                        <Button Grid.Row="5" Grid.Column="1"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[10]}"
+                                                IsEnabled="{Binding SmallLockers[10].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[10].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[10].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[10].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                        <!-- 第6行第2列 - 12 -->
+                                        <Button Grid.Row="6" Grid.Column="1"
+                                                Classes="locker-button"
+                                                Command="{Binding #AdminLockControl.DataContext.OnLockerClickCommand}"
+                                                CommandParameter="{Binding SmallLockers[11]}"
+                                                IsEnabled="{Binding SmallLockers[11].IsEnabled}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Button.Template>
+                                                <ControlTemplate>
+                                                    <Border Name="border"
+                                                            BorderBrush="#979797"
+                                                            BorderThickness="1"
+                                                            CornerRadius="0"
+                                                            Background="{Binding SmallLockers[11].DisplayColor}">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding SmallLockers[11].DisplayNumber}"
+                                                                       FontSize="18" Foreground="#5C5C5C"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Border Background="#4CAF50" CornerRadius="2" Padding="2"
+                                                                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
+                                                                    Width="16" Height="16"
+                                                                    IsVisible="{Binding SmallLockers[11].IsOpened}">
+                                                                <TextBlock Text="✓" FontSize="10" Foreground="White"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                           FontWeight="Bold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

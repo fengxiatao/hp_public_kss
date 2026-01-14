@@ -1,0 +1,227 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:n="using:FaceLocker.Views.NumPadControls"
+			 mc:Ignorable="d"
+			 Width="536" Height="405"
+			 Background="#F7F8FA"
+			 x:Class="FaceLocker.Views.NumPadControls.NumPadControl">
+
+	<!-- 主容器 -->
+	<Grid Width="536" Height="405" Background="#F7F8FA">
+		<!-- 输入框 -->
+		<TextBox Name="InputBox"
+				 Width="520" Height="80"
+				 Margin="8,14,0,0"
+				 HorizontalAlignment="Left"
+				 VerticalAlignment="Top"
+				 FontSize="36"
+				 FontWeight="Bold"
+				 Background="#E4E5E7"
+				 Foreground="#323233"
+				 TextAlignment="Center"
+				 VerticalContentAlignment="Center"
+				 Text="{Binding Text, RelativeSource={RelativeSource AncestorType=n:NumPadControl}}"
+				 Watermark="请输入"
+				 IsReadOnly="True"
+				 ContextMenu="{x:Null}"
+				 Focusable="False"
+				 BorderThickness="1"
+				 BorderBrush="#CCCCCC">
+		</TextBox>
+
+		<!-- 按钮区域 -->
+		<Canvas Width="536" Height="311"
+				Margin="0,94,0,0"
+				HorizontalAlignment="Left"
+				VerticalAlignment="Top">
+
+			<!-- 第1行：7, 8, 9, 删除按钮（前两行） -->
+			<!-- 数字7 -->
+			<n:NumPadButton Name="Btn7"
+							Width="123" Height="63"
+							Canvas.Left="8" Canvas.Top="15"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad7">
+				7
+			</n:NumPadButton>
+
+			<!-- 数字8 -->
+			<n:NumPadButton Name="Btn8"
+							Width="123" Height="63"
+							Canvas.Left="139" Canvas.Top="15"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad8">
+				8
+			</n:NumPadButton>
+
+			<!-- 数字9 -->
+			<n:NumPadButton Name="Btn9"
+							Width="123" Height="63"
+							Canvas.Left="270" Canvas.Top="15"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad9">
+				9
+			</n:NumPadButton>
+
+			<!-- 删除按钮（占前两行） -->
+			<n:NumPadButton Name="BtnDelete"
+							Width="123" Height="134"
+							Canvas.Left="405" Canvas.Top="15"
+							Background="White"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="Back">
+				<Image Source="/Assets/numpad_delete.png"
+					   Width="48"
+					   Height="48"
+					   Stretch="Uniform"/>
+			</n:NumPadButton>
+
+			<!-- 第2行：4, 5, 6 -->
+			<!-- 数字4 -->
+			<n:NumPadButton Name="Btn4"
+							Width="123" Height="63"
+							Canvas.Left="8" Canvas.Top="86"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad4">
+				4
+			</n:NumPadButton>
+
+			<!-- 数字5 -->
+			<n:NumPadButton Name="Btn5"
+							Width="123" Height="63"
+							Canvas.Left="139" Canvas.Top="86"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad5">
+				5
+			</n:NumPadButton>
+
+			<!-- 数字6 -->
+			<n:NumPadButton Name="Btn6"
+							Width="123" Height="63"
+							Canvas.Left="270" Canvas.Top="86"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad6">
+				6
+			</n:NumPadButton>
+
+			<!-- 第3行：1, 2, 3, 确认按钮（后两行） -->
+			<!-- 数字1 -->
+			<n:NumPadButton Name="Btn1"
+							Width="123" Height="63"
+							Canvas.Left="8" Canvas.Top="157"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad1">
+				1
+			</n:NumPadButton>
+
+			<!-- 数字2 -->
+			<n:NumPadButton Name="Btn2"
+							Width="123" Height="63"
+							Canvas.Left="139" Canvas.Top="157"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad2">
+				2
+			</n:NumPadButton>
+
+			<!-- 数字3 -->
+			<n:NumPadButton Name="Btn3"
+							Width="123" Height="63"
+							Canvas.Left="270" Canvas.Top="157"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad3">
+				3
+			</n:NumPadButton>
+
+			<!-- 确认按钮（占后两行） -->
+			<n:NumPadButton Name="BtnEnter"
+							Width="123" Height="134"
+							Canvas.Left="405" Canvas.Top="157"
+							Background="Blue"
+							Foreground="White"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="Enter">
+				确认
+			</n:NumPadButton>
+
+			<!-- 第4行：0（占两列）, . -->
+			<!-- 数字0（占两列） -->
+			<n:NumPadButton Name="Btn0"
+							Width="250" Height="63"
+							Canvas.Left="8" Canvas.Top="228"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="NumPad0">
+				0
+			</n:NumPadButton>
+
+			<!-- . 按钮 -->
+			<n:NumPadButton Name="BtnDot"
+							Width="123" Height="63"
+							Canvas.Left="270" Canvas.Top="228"
+							Background="White"
+							Foreground="#323233"
+							FontSize="24"
+							FontWeight="Bold"
+							HorizontalContentAlignment="Center"
+							VerticalContentAlignment="Center"
+							Key="Decimal">
+				.
+			</n:NumPadButton>
+		</Canvas>
+	</Grid>
+</UserControl>

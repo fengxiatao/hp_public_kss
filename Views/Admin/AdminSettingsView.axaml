@@ -1,0 +1,410 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:FaceLocker.ViewModels"
+			 mc:Ignorable="d"
+			 d:DesignWidth="1200" d:DesignHeight="600"
+			 x:Class="FaceLocker.Views.AdminSettingsView"
+			 x:DataType="vm:AdminSettingsViewModel">
+
+	<UserControl.Styles>
+		<Style Selector="TextBlock.section-title">
+			<Setter Property="FontSize" Value="18"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Foreground" Value="#2c3e50"/>
+			<Setter Property="Margin" Value="0,0,0,10"/>
+		</Style>
+
+		<Style Selector="TextBlock.setting-label">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Foreground" Value="#34495e"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Margin" Value="0,0,10,0"/>
+			<Setter Property="Width" Value="150"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+		</Style>
+
+		<Style Selector="TextBox.setting-input">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Padding" Value="8"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="BorderBrush" Value="#bdc3c7"/>
+			<Setter Property="Background" Value="White"/>
+			<Setter Property="Width" Value="300"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+		</Style>
+
+		<Style Selector="NumericUpDown.setting-input">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Padding" Value="8"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="BorderBrush" Value="#bdc3c7"/>
+			<Setter Property="Background" Value="White"/>
+			<Setter Property="Width" Value="300"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+		</Style>
+
+		<Style Selector="Button.save-button">
+			<Setter Property="Background" Value="#3498db"/>
+			<Setter Property="Foreground" Value="White"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Padding" Value="15,8"/>
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="Margin" Value="10,0,0,0"/>
+		</Style>
+
+		<Style Selector="Button.save-button:pointerover">
+			<Setter Property="Background" Value="#2980b9"/>
+		</Style>
+
+		<Style Selector="Border.section-border">
+			<Setter Property="BorderBrush" Value="#ecf0f1"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Background" Value="White"/>
+			<Setter Property="CornerRadius" Value="5"/>
+			<Setter Property="Padding" Value="20"/>
+			<Setter Property="Margin" Value="0,0,0,20"/>
+		</Style>
+
+		<!-- 新增样式用于对齐设置项 -->
+		<Style Selector="StackPanel.setting-container">
+			<Setter Property="Spacing" Value="15"/>
+		</Style>
+
+		<Style Selector="Grid.setting-row">
+			<Setter Property="Margin" Value="0,0,0,15"/>
+		</Style>
+	</UserControl.Styles>
+
+	<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+		<StackPanel Margin="20" Spacing="0">
+
+			<!-- 1. 主机设置区域 -->
+			<Border Classes="section-border">
+				<StackPanel Classes="setting-container">
+					<TextBlock Classes="section-title" Text="主机设置"/>
+
+					<!-- 设备名称 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="本机标识:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding DeviceName}"
+								 Watermark="请输入设备名称"/>
+					</Grid>
+
+					<!-- 服务器地址 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="服务器IP:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding ServerAddress}"
+								 Watermark="请输入服务器IP地址"/>
+					</Grid>
+
+					<!-- 服务器端口 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="服务器端口:"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding ServerPort}"
+									   Minimum="1" Maximum="65535"/>
+					</Grid>
+
+					<!-- 心跳检测间隔 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="心跳检测间隔(秒):"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding CheckInterval}"
+									   Minimum="10" Maximum="3600"/>
+					</Grid>
+
+					<!-- 保存按钮 -->
+					<Button Classes="save-button"
+							HorizontalAlignment="Left"
+							Content="保存主机设置"
+							Command="{Binding SaveServerSettingsCommand}"/>
+				</StackPanel>
+			</Border>
+
+			<!-- 2. 摄像头设置区域 -->
+			<Border Classes="section-border">
+				<StackPanel Classes="setting-container">
+					<TextBlock Classes="section-title" Text="摄像头设置"/>
+
+					<!-- 默认摄像头索引 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="默认摄像头索引:"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding DefaultCameraIndex}"
+									   Minimum="0" Maximum="99"/>
+					</Grid>
+
+					<!-- 摄像头设备路径 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="摄像头路径:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding CameraDevicePath}"
+								 Watermark="例如: /dev/video0"/>
+					</Grid>
+
+					<!-- 帧率 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="帧率:"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding FrameRate}"
+									   Minimum="1" Maximum="60"/>
+					</Grid>
+
+					<!-- 分辨率宽度 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="分辨率宽度:"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding ResolutionWidth}"
+									   Minimum="320" Maximum="1920"/>
+					</Grid>
+
+					<!-- 分辨率高度 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="分辨率高度:"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding ResolutionHeight}"
+									   Minimum="240" Maximum="1080"/>
+					</Grid>
+
+					<!-- 保存按钮 -->
+					<Button Classes="save-button"
+							HorizontalAlignment="Left"
+							Content="保存摄像头设置"
+							Command="{Binding SaveCameraSettingsCommand}"/>
+				</StackPanel>
+			</Border>
+
+			<!-- 3. 数据库设置区域 -->
+			<Border Classes="section-border">
+				<StackPanel Classes="setting-container">
+					<TextBlock Classes="section-title" Text="数据库设置"/>
+
+					<!-- 数据库连接字符串 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="数据库连接字符串:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding DatabaseConnectionString}"
+								 Watermark="例如: Data Source=./Data/database.db"/>
+					</Grid>
+
+					<!-- 数据目录地址 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="数据库目录地址:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding DataDirectory}"
+								 Watermark="例如: ./Data/"/>
+					</Grid>
+
+					<!-- 保存按钮 -->
+					<Button Classes="save-button"
+							HorizontalAlignment="Left"
+							Content="保存数据库设置"
+							Command="{Binding SaveDatabaseSettingsCommand}"/>
+				</StackPanel>
+			</Border>
+
+			<!-- 4. 锁控板设置区域 -->
+			<Border Classes="section-border">
+				<StackPanel Classes="setting-container">
+					<TextBlock Classes="section-title" Text="锁控板设置"/>
+
+					<!-- 柜组名称 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="柜组名称:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding LockGroupName}"
+								 Watermark="请输入柜组名称"/>
+					</Grid>
+
+					<!-- 本地IP地址 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="本地IP地址:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding LocalIpAddress}"
+								 Watermark="例如: 192.168.1.100"/>
+					</Grid>
+
+					<!-- 柜组方向 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="柜组方向:"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding LockDirection}"
+									   Minimum="0" Maximum="1"/>
+					</Grid>
+
+					<!-- 锁控板数量 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="锁控板数量:"
+								   VerticalAlignment="Center"/>
+						<NumericUpDown Grid.Column="1"
+									   Classes="setting-input"
+									   Value="{Binding LockBoardCount}"
+									   Minimum="0" Maximum="50"/>
+					</Grid>
+
+					<!-- 串口地址 -->
+					<Grid Classes="setting-row">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Column="0"
+								   Classes="setting-label"
+								   Text="串口地址:"
+								   VerticalAlignment="Center"/>
+						<TextBox Grid.Column="1"
+								 Classes="setting-input"
+								 Text="{Binding LockSerialPort}"
+								 Watermark="例如: /dev/ttyS9"/>
+					</Grid>
+
+					<!-- 保存按钮 -->
+					<Button Classes="save-button"
+							HorizontalAlignment="Left"
+							Content="保存锁控板设置"
+							Command="{Binding SaveLockControllerSettingsCommand}"/>
+				</StackPanel>
+			</Border>
+
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

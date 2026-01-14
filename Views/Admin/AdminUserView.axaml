@@ -1,0 +1,301 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:FaceLocker.Converters"
+             xmlns:vm="clr-namespace:FaceLocker.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="600"
+             x:Class="FaceLocker.Views.AdminUserView"
+             x:DataType="vm:AdminUserViewModel">
+    
+    <UserControl.Styles>
+        <Style Selector="TextBlock.column-header">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#2c3e50"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style Selector="TextBlock.column-data">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#34495e"/>
+        </Style>
+        
+        <Style Selector="Border.data-row">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#ecf0f1"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+        
+        <Style Selector="Border.data-row:pointerover">
+            <Setter Property="Background" Value="#f8f9fa"/>
+        </Style>
+        
+        <Style Selector="Border.status-indicator">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+        </Style>
+        
+        <Style Selector="TextBox.search-box">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#bdc3c7"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Watermark" Value="输入用户编号或姓名搜索..."/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 搜索区域 -->
+        <Border Grid.Row="0" Background="#ecf0f1" Padding="15" Margin="0,0,0,10" CornerRadius="5">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBox x:Name="SearchTextBox" 
+                         Classes="search-box" 
+                         Width="300"
+                         Text="{Binding SearchKeyword, Mode=TwoWay}"/>
+                <Button Content="搜索" 
+                        Padding="15,8"
+                        Background="#3498db" 
+                        Foreground="White"
+                        BorderThickness="0"
+                        CornerRadius="4"
+                        FontSize="14"
+                        Cursor="Hand"
+                        Command="{Binding SearchCommand}"/>
+                <Button Content="重置" 
+                        Padding="15,8"
+                        Background="#95a5a6" 
+                        Foreground="White"
+                        BorderThickness="0"
+                        CornerRadius="4"
+                        FontSize="14"
+                        Cursor="Hand"
+                        Command="{Binding ResetSearchCommand}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 表格区域 -->
+        <Border Grid.Row="1" Background="White" CornerRadius="5" BorderBrush="#bdc3c7" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 表头 -->
+                <Border Grid.Row="0" Background="#ecf0f1" BorderBrush="#bdc3c7" BorderThickness="0,0,0,1">
+                    <Grid Margin="15,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="用户编号" Classes="column-header"/>
+                        <TextBlock Grid.Column="1" Text="用户姓名" Classes="column-header"/>
+                        <TextBlock Grid.Column="2" Text="角色" Classes="column-header"/>
+                        <TextBlock Grid.Column="3" Text="头像" Classes="column-header"/>
+                        <TextBlock Grid.Column="4" Text="人脸特征" Classes="column-header"/>
+                        <TextBlock Grid.Column="5" Text="特征版本" Classes="column-header"/>
+                        <TextBlock Grid.Column="6" Text="创建时间" Classes="column-header"/>
+                    </Grid>
+                </Border>
+
+                <!-- 数据行 -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="UsersItemsControl" Margin="0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:UserItem">
+                                <Border Classes="data-row">
+                                    <Grid Margin="15,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="150"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" 
+                                                  Text="{Binding UserId}" 
+                                                  Classes="column-data"/>
+                                                  
+                                        <TextBlock Grid.Column="1" 
+                                                  Text="{Binding UserName}" 
+                                                  Classes="column-data"/>
+                                                  
+                                        <TextBlock Grid.Column="2" 
+                                                  Text="{Binding RoleName}" 
+                                                  Classes="column-data"/>
+                                        
+                                        <Image Grid.Column="3" 
+                                               Source="{Binding AvatarPath}" 
+                                               Width="40" Height="40" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                        
+                                        <StackPanel Grid.Column="4" 
+                                                    Orientation="Horizontal" 
+                                                    VerticalAlignment="Center">
+                                            <Border Classes="status-indicator"
+                                                    Background="{Binding HasFaceFeature, Converter={x:Static converters:BoolToBrushConverter.Instance}, ConverterParameter='#27ae60;#e74c3c'}"/>
+                                            <TextBlock Text="{Binding HasFaceFeature, Converter={x:Static converters:BoolToRegisteredTextConverter.Instance}}" 
+                                                      Classes="column-data"/>
+                                        </StackPanel>
+                                        
+                                        <TextBlock Grid.Column="5" 
+                                                  Text="{Binding FaceFeatureVersion}" 
+                                                  Classes="column-data"/>
+                                                  
+                                        <TextBlock Grid.Column="6" 
+                                                  Text="{Binding CreatedTime, StringFormat='yyyy-MM-dd HH:mm'}" 
+                                                  Classes="column-data"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- 加载指示器 -->
+                <Border Grid.Row="1" 
+                        Background="#80ffffff" 
+                        IsVisible="{Binding IsLoading}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="20">
+                        <ProgressBar Width="30" Height="30" IsIndeterminate="True"/>
+                        <TextBlock Text="加载中..." FontSize="14" Foreground="#2c3e50" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 无数据提示 -->
+                <Border Grid.Row="1" 
+                        Background="Transparent" 
+                        IsVisible="{Binding HasNoData}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding NoDataMessage}" 
+                              FontSize="16" 
+                              Foreground="#7f8c8d" 
+                              VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- 分页控制区域 -->
+        <Border Grid.Row="2" 
+                Background="#ecf0f1" 
+                Padding="15" 
+                Margin="0,10,0,0" 
+                CornerRadius="5"
+                BorderBrush="#bdc3c7" 
+                BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 总记录数 -->
+                <TextBlock Grid.Column="0" 
+                          x:Name="TotalCountText" 
+                          VerticalAlignment="Center" 
+                          FontSize="14"
+                          Foreground="#2c3e50"/>
+                
+                <!-- 每页显示数量 -->
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            VerticalAlignment="Center" 
+                            Spacing="10" 
+                            Margin="0,0,20,0">
+                    <TextBlock Text="每页显示:" 
+                              VerticalAlignment="Center" 
+                              FontSize="14"
+                              Foreground="#2c3e50"/>
+                    <ComboBox x:Name="PageSizeComboBox" 
+                              Width="80" 
+                              FontSize="14"
+                              Background="White"
+                              BorderBrush="#bdc3c7"/>
+                </StackPanel>
+
+                <!-- 分页按钮 -->
+                <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal" 
+                            Spacing="5">
+                    <Button Content="首页" 
+                            x:Name="FirstPageButton" 
+                            Padding="12,6" 
+                            FontSize="14"
+                            Background="#3498db" 
+                            Foreground="White" 
+                            BorderThickness="0" 
+                            CornerRadius="3"
+                            Cursor="Hand"/>
+                            
+                    <Button Content="上一页" 
+                            x:Name="PreviousPageButton" 
+                            Padding="12,6" 
+                            FontSize="14"
+                            Background="#3498db" 
+                            Foreground="White" 
+                            BorderThickness="0" 
+                            CornerRadius="3"
+                            Cursor="Hand"/>
+                            
+                    <TextBlock x:Name="CurrentPageText" 
+                              VerticalAlignment="Center" 
+                              Margin="10,0" 
+                              FontSize="14"
+                              Foreground="#2c3e50"/>
+                              
+                    <TextBlock x:Name="TotalPagesText" 
+                              VerticalAlignment="Center" 
+                              Margin="0,0,10,0" 
+                              FontSize="14"
+                              Foreground="#2c3e50"/>
+                              
+                    <Button Content="下一页" 
+                            x:Name="NextPageButton" 
+                            Padding="12,6" 
+                            FontSize="14"
+                            Background="#3498db" 
+                            Foreground="White" 
+                            BorderThickness="0" 
+                            CornerRadius="3"
+                            Cursor="Hand"/>
+                            
+                    <Button Content="末页" 
+                            x:Name="LastPageButton" 
+                            Padding="12,6" 
+                            FontSize="14"
+                            Background="#3498db" 
+                            Foreground="White" 
+                            BorderThickness="0" 
+                            CornerRadius="3"
+                            Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
