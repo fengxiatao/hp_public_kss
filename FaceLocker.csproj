@@ -47,6 +47,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!-- 避免重复 Include 导致 AVLN2002；保留默认的 AvaloniaXaml 收集逻辑即可 -->
+		<AvaloniaXaml Update="App.axaml" />
 		<AvaloniaResource Include="Assets\**" />
 		<EmbeddedResource Include="Data\**" />
 		<AvaloniaXaml Remove="Generated\**" />
