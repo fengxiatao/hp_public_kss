@@ -135,76 +135,7 @@ namespace FaceLocker.Views
             if (ViewModel != null)
             {
                 _ = ViewModel.SetNativeVideoWindowAsync(e.X11WindowId);
-                
-                // 初始化人脸框弹出窗口
-                InitializeFaceBoxPopup();
             }
-        }
-        
-        /// <summary>
-        /// 初始化人脸框弹出窗口
-        /// </summary>
-        private void InitializeFaceBoxPopup()
-        {
-            _logger.LogInformation("InitializeFaceBoxPopup 被调用");
-            
-            if (_nativeVideoHost == null)
-            {
-                _logger.LogWarning("InitializeFaceBoxPopup: _nativeVideoHost 为 null");
-                return;
-            }
-            if (ViewModel == null)
-            {
-                _logger.LogWarning("InitializeFaceBoxPopup: ViewModel 为 null");
-                return;
-            }
-                
-            // 获取视频控件在屏幕上的位置
-            Dispatcher.UIThread.Post(() =>
-            {
-                try
-                {
-                    _logger.LogInformation("InitializeFaceBoxPopup: 开始计算位置");
-                    
-                    var visualRoot = _nativeVideoHost.GetVisualRoot();
-                    _logger.LogInformation("InitializeFaceBoxPopup: visualRoot = {Root}", visualRoot?.GetType().Name ?? "null");
-                    
-                    if (visualRoot is Window window)
-                    {
-                        // 获取控件相对于窗口的位置
-                        var transformMatrix = _nativeVideoHost.TransformToVisual(window);
-                        _logger.LogInformation("InitializeFaceBoxPopup: transformMatrix HasValue = {HasValue}", transformMatrix.HasValue);
-                        
-                        if (transformMatrix.HasValue)
-                        {
-                            var topLeft = transformMatrix.Value.Transform(new Point(0, 0));
-                            var windowPos = window.Position;
-                            
-                            // 计算屏幕绝对位置
-                            double screenX = windowPos.X + topLeft.X;
-                            double screenY = windowPos.Y + topLeft.Y;
-                            double width = _nativeVideoHost.Bounds.Width;
-                            double height = _nativeVideoHost.Bounds.Height;
-                            
-                            _logger.LogInformation("视频控件位置: 屏幕({X},{Y}), 尺寸({W}x{H})", screenX, screenY, width, height);
-                            
-                            ViewModel.InitializeFaceBoxPopup(screenX, screenY, width, height);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("InitializeFaceBoxPopup: transformMatrix 为空");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning("InitializeFaceBoxPopup: visualRoot 不是 Window");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "初始化人脸框弹出窗口失败");
-                }
-            });
         }
         #endregion
 
@@ -515,7 +446,7 @@ namespace FaceLocker.Views
                 // 关闭人脸框弹出窗口
                 try
                 {
-                    ViewModel?.CloseFaceBoxPopup();
+                    // FaceBoxPopup 方案已移除（X11 透明窗口兼容性问题）
                     _logger.LogDebug("人脸框弹出窗口已关闭");
                 }
                 catch (Exception popupEx)

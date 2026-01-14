@@ -1,6 +1,7 @@
 # Build results
 bin/
 obj/
+Generated/
 
 # IDE
 .vs/
@@ -20,4 +21,6 @@ kss/
 # Native build artifacts
 native/v4l2_mpp_camera/build/
 *.o
+ 
+# mpp（历史原因可能存在本地源码/子仓库；主仓库不跟踪它，避免出现 -dirty）
 mpp/

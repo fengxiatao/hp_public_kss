@@ -638,8 +638,6 @@ namespace FaceLocker.ViewModels
                     var currentFps = _frameCount / elapsed;
                     var avgFrameTime = _totalFrameProcessTimeMs / (double)_frameCount;
                     var msg = $"[取物性能] 显示FPS: {currentFps:F1}, 平均帧处理: {avgFrameTime:F2}ms, 总帧数: {_frameCount}";
-                    Console.WriteLine(msg);
-                    Console.Out.Flush();
                     _logger.LogInformation(msg);
                     _frameCount = 0;
                     _totalFrameProcessTimeMs = 0;

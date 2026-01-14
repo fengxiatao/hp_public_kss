@@ -328,11 +328,6 @@ namespace FaceLocker.ViewModels
             set => this.RaiseAndSetIfChanged(ref _cameraHeight, value);
         }
 
-        /// <summary>
-        /// 人脸框弹出窗口（用于原生视频模式）
-        /// </summary>
-        private FaceLocker.Views.Controls.FaceBoxPopup? _faceBoxPopup;
-        
         #endregion
 
         private bool _showCountdown;
@@ -792,9 +787,7 @@ namespace FaceLocker.ViewModels
                 //     {
                 //         // 忽略绘制异常
                 //     }
-                if (false) // 禁用
-                {
-                }
+                // 已切换到 Native GStreamer+cairooverlay 绘制人脸框；此处不再保留空的禁用分支
 
                 // 更新摄像头图像
                 CameraVideoElement = frame;
@@ -810,8 +803,6 @@ namespace FaceLocker.ViewModels
                     var currentFps = _frameCount / elapsed;
                     var avgFrameTime = _totalFrameProcessTimeMs / (double)_frameCount;
                     var msg = $"[性能统计] 显示FPS: {currentFps:F1}, 平均帧处理: {avgFrameTime:F2}ms, 总帧数: {_frameCount}";
-                    Console.WriteLine(msg);
-                    Console.Out.Flush();
                     _logger.LogInformation(msg);
                     _frameCount = 0;
                     _totalFrameProcessTimeMs = 0;
@@ -1061,33 +1052,6 @@ namespace FaceLocker.ViewModels
             });
         }
 
-        /// <summary>
-        /// 初始化人脸框弹出窗口（在原生视频模式下使用）
-        /// 注意：X11 透明窗口支持有限，暂时禁用此功能
-        /// </summary>
-        public void InitializeFaceBoxPopup(double x, double y, double width, double height)
-        {
-            // 暂时禁用弹出窗口方案，因为 X11 透明窗口会导致视频白屏
-            _logger.LogInformation("人脸框弹出窗口功能已禁用（X11透明窗口兼容性问题）");
-            
-            // TODO: 考虑在 GStreamer 管道中使用 cairooverlay 绘制人脸框
-        }
-
-        /// <summary>
-        /// 关闭人脸框弹出窗口
-        /// </summary>
-        public void CloseFaceBoxPopup()
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (_faceBoxPopup != null)
-                {
-                    _faceBoxPopup.Close();
-                    _faceBoxPopup = null;
-                    _logger.LogInformation("人脸框弹出窗口已关闭");
-                }
-            });
-        }
         #endregion
 
         #region 异步进行人脸检测
@@ -1104,14 +1068,11 @@ namespace FaceLocker.ViewModels
 
             try
             {
-                Console.WriteLine($"[FaceDetect] 开始检测, Mat: {mat.Width}x{mat.Height}");
                 var detectionResult = await _baiduFaceService.DetectFacesOnlyAsync(mat);
-                Console.WriteLine($"[FaceDetect] 检测结果: Success={detectionResult.Success}, FaceCount={detectionResult.FaceCount}");
                 return detectionResult;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[FaceDetect] 检测异常: {ex.Message}");
                 _logger.LogError(ex, "人脸检测时发生异常");
                 return new FaceDetectionResult { Success = false };
             }

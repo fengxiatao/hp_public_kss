@@ -8,7 +8,8 @@
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<!-- 默认不要输出编译器生成文件到仓库目录，避免 Generated/ 造成 git 混乱 -->
+		<EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
 
 		<!-- ARM64 优化配置 -->
@@ -40,6 +41,7 @@
 		<DefineConstants>$(DefineConstants);LINUX</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	  <NoWarn>0168;8600;8602;8603;8604;8618;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

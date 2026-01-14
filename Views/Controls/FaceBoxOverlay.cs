@@ -77,7 +77,7 @@ namespace FaceLocker.Views.Controls
         /// 源视频高度（摄像头分辨率高度）
         /// </summary>
         public static readonly StyledProperty<int> SourceHeightProperty =
-            AvaloniaProperty.Register<FaceBoxOverlay, int>(nameof(SourceHeight), 480);
+            AvaloniaProperty.Register<FaceBoxOverlay, int>(nameof(SourceHeight), 360);
 
         public int SourceHeight
         {
@@ -101,14 +101,8 @@ namespace FaceLocker.Views.Controls
             var boxes = FaceBoxes;
             var bounds = Bounds;
             
-            // 调试：总是绘制一个测试框
-            Console.WriteLine($"[FaceBoxOverlay] Render called, Bounds={bounds.Width}x{bounds.Height}, Boxes={(boxes?.Count ?? 0)}");
-            
             if (boxes == null || boxes.Count == 0)
             {
-                // 测试：绘制一个红色测试框确认控件在工作
-                // var testPen = new Pen(Brushes.Red, 2);
-                // context.DrawRectangle(null, testPen, new Rect(10, 10, 100, 100));
                 return;
             }
 
@@ -137,8 +131,6 @@ namespace FaceLocker.Views.Controls
                 double rectWidth = width * scaleX;
                 double rectHeight = height * scaleY;
 
-                Console.WriteLine($"[FaceBoxOverlay] Drawing box: src=({srcLeft:F0},{srcTop:F0},{width:F0},{height:F0}) -> screen=({left:F0},{top:F0},{rectWidth:F0},{rectHeight:F0})");
-
                 // 边界检查
                 left = Math.Max(0, Math.Min(bounds.Width - 10, left));
                 top = Math.Max(0, Math.Min(bounds.Height - 10, top));
@@ -148,8 +140,6 @@ namespace FaceLocker.Views.Controls
                 // 绘制矩形框
                 var rect = new Rect(left, top, rectWidth, rectHeight);
                 context.DrawRectangle(null, pen, rect, 4, 4); // 带圆角
-                
-                Console.WriteLine($"[FaceBoxOverlay] Drew rect at ({rect.X:F0},{rect.Y:F0}) size ({rect.Width:F0},{rect.Height:F0})");
 
                 // 如果有置信度，可以显示
                 if (box.Score > 0)
